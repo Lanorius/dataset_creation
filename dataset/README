@@ -1,0 +1,6 @@
+script_01:
+Takes the current version of the bindingDB_all.tsv and extracts the columns of interest for DTI analysis into a separate file
+Planned update: Instead of creating a separate slimed down file it will create:
+	a fasta file using the sequence and the Swissprot ID
+	a SMILE file using the smile and PubCHEM CID
+	an interaction file using the same IDs as the two before
