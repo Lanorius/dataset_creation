@@ -12,14 +12,4 @@ Idealy multipe sources of data will be combineable
 
 
 
-
-script_01:
-Takes the current version of the bindingDB_all.tsv and extracts the columns of interest for DTI analysis into a separate file
-Updates are paused since the following steps will be part of the evalutaion phase, and will be done on a different subset that I am working on currently
-Planned update: Instead of creating a separate slimed down file it will create:
-	a fasta file using the sequence and the Swissprot ID
-	a SMILE file using the smile and PubCHEM CID
-	an interaction file using the same IDs as the two before
-	
-script_02: 
-To create Kiba scores you require ic50 scores and either Ki or Kd values. This script checks how many rows from bindingDB fullfill that requirement.
+<
