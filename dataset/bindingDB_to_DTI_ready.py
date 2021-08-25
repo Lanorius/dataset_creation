@@ -34,6 +34,8 @@ bindingdb_all = pd.read_csv(filepath_or_buffer=path, sep=sep, usecols = cols, er
 # Homo sapiens organisms were selected.
 bindingdb_all = bindingdb_all[bindingdb_all['Target Source Organism According to Curator or DataSource'] == "Homo sapiens"]
 
+
+
 # Then, those lacking UniProt/PubChem IDs were removed.
 bindingdb_all = bindingdb_all.dropna( how='any', subset=['PubChem CID'])
 bindingdb_all = bindingdb_all.dropna( how='any', subset=['UniProt (SwissProt) Primary ID of Target Chain']) # this might need expanding
@@ -46,6 +48,7 @@ bindingdb_all['Kd (nM)'] = pd.to_numeric(bindingdb_all['Kd (nM)'],errors='coerce
 bindingdb_all = bindingdb_all.dropna( how='any', subset=['Kd (nM)'])
 
 
+
 # bindingdb_all = bindingdb_all[bindingdb_all['Kd (nM)'].map(type) == str] # not needed since some have proper values cast as strings
 # kicks out way too many rows because some cells hold multiple values, and some are saved as strings
 
@@ -53,7 +56,7 @@ bindingdb_all = bindingdb_all.dropna( how='any', subset=['Kd (nM)'])
 # bindingdb_all = bindingdb_all[bindingdb_all['Kd (nM)'].map(float)] 
 # needs adjustment to keep the strings with single values and only kicks out the rows with multiple values
 
-print(bindingdb_all)
+print(bindingdb_all.shape())
 
 
 # Preprocessing

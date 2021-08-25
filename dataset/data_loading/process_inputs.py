@@ -7,7 +7,7 @@ def parse_config():
     config.read("config.ini")
     files = config["INPUT FILES"]
     file_specifications = config['FILE SPECIFICATIONS']
-    params = config['SIMILARITY PARAMETERS']
+    params = config['PARAMETERS']
 
 
     return(files, file_specifications, params)
