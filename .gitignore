@@ -1,2 +1,3 @@
 papers
-./dataset/ignored_files
+ignored_files
+cleaned_frame.tsv
