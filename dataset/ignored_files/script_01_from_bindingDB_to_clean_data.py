@@ -16,9 +16,10 @@ import numpy as np
 # cols = ['Ligand SMILES','PubChem CID','PubChem SID','BindingDB Target Chain  Sequence','Kd (nM)']
 # cols = ['PubChem CID','PubChem SID']
 cols = ['Target Name Assigned by Curator or DataSource','PubChem CID','UniProt (SwissProt) Primary ID of Target Chain','ChEMBL ID of Ligand','Target Source Organism According to Curator or DataSource','Ligand SMILES','BindingDB Target Chain  Sequence','Kd (nM)']
-path = '/media/daniel/Elements/data/BindingDB_All_2021m7.tsv/BindingDB_All.tsv'
+path = '/media/lanorius/Elements/data/BindingDB_All.tsv'
 
 bindingdb_all = pd.read_csv(filepath_or_buffer=path, sep='\t', usecols = cols, error_bad_lines=False)
+print(bindingdb_all.shape)
 # bindingdb_all = pd.read_csv(filepath_or_buffer=path, sep='\t', error_bad_lines=False)
 
 # cond = xor(bindingdb_all['PubChem CID'] == 'NaN', bindingdb_all['PubChem SID'] == 'NaN')
@@ -50,7 +51,7 @@ bindingdb_all = bindingdb_all.dropna( how='any', subset=['Kd (nM)'])
 
 print(bindingdb_all)
 
-bindingdb_all.to_csv('cleaned_bindingDB_all.tsv', sep='\t', header=True, index=True, mode='w')
+# bindingdb_all.to_csv('cleaned_bindingDB_all.tsv', sep='\t', header=True, index=True, mode='w')
 
 
 
