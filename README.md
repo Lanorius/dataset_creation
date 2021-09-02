@@ -20,3 +20,7 @@ cleaned_tsv_to_D_T_I.py takes the cleaned tsv and devides it into:
 	-a file for the ligands
 	-an interaction file 
 The first two files can then be used to create embeddings or other representations for the final DTI prediction. 
+
+building_pieces:
+This folder holds scripts that I used to piece together the actual clean up script. 
+Statistics on the data were also created using these scripts.

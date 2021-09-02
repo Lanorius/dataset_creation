@@ -23,7 +23,7 @@ d = open('drug_file.txt', 'w')
 
 file = pd.read_csv(filepath_or_buffer=path, sep=sep, engine='python')
 print(file)
-'''
+
 for index, row in file.iterrows():
 
     f.write(">"+row[protein_IDs]+"\n")
@@ -40,7 +40,6 @@ for index, row in file.iterrows():
         f.write("\n")
 
     d.write(row[ligand_IDs]+"\t"+row[ligand_SMILE]+"\n")
-'''
 
 interactions = file.pivot_table(index=ligand_IDs, columns=protein_IDs, values=interaction_value, aggfunc='sum')
 print(interactions)
