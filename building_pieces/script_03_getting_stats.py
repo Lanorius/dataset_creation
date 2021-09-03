@@ -10,10 +10,17 @@ output_Ki = '/media/lanorius/Elements/data/statistics_on_bDB/bindingDB_Ki.pdf'
 output_IC50 = '/media/lanorius/Elements/data/statistics_on_bDB/bindingDB_IC50.pdf'
 output_pKd = '/media/lanorius/Elements/data/statistics_on_bDB/bindingDB_pKd.pdf'
 output_EC50 = '/media/lanorius/Elements/data/statistics_on_bDB/bindingDB_EC50.pdf'
-output_kon = '/media/lanorius/Elements/data/statistics_on_bDB/bindingDB_kon.pdf'
-output_koff = '/media/lanorius/Elements/data/statistics_on_bDB/bindingDB_koff.pdf'
+
+
 
 '''
+# maybe for later
+output_kon = '/media/lanorius/Elements/data/statistics_on_bDB/bindingDB_kon.pdf'
+output_koff = '/media/lanorius/Elements/data/statistics_on_bDB/bindingDB_koff.pdf'
+'''
+
+
+
 # short stats on the species
 species = ['Target Source Organism According to Curator or DataSource']
 unique_species = pd.read_csv(filepath_or_buffer=path, sep=sep, usecols=species)
@@ -21,7 +28,7 @@ unique_species = pd.read_csv(filepath_or_buffer=path, sep=sep, usecols=species)
 freq_table = unique_species[species].squeeze().value_counts().to_frame()
 
 row_num = unique_species.shape[0]
-freq_table['percetage'] = freq_table[species] / row_num
+freq_table['percentage of total'] = freq_table[species] / row_num
 
 freq_table.to_csv(output_species, sep='\t')
 '''
@@ -95,3 +102,5 @@ ax_EC50 = interaction_tsv_EC50['EC50 (nM)'].plot(kind='hist', bins=20, title="Fr
 ax_EC50.set_xlabel("log10(EC50)")  # plot has an xlabel argument, but for some reason that throws an error
 ax_EC50.get_figure().savefig(output_EC50)
 ax_EC50.remove()  # otherwise the artist is kept and the next plot will still include this plot
+
+'''
