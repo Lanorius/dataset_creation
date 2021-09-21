@@ -12,6 +12,7 @@ NEXT STEP: All files need redundancy reduction.
 path = '/media/lanorius/Elements/data/cleaned_frame.tsv'
 sep = '\t'
 
+# the following could be specified using the same config file that input_to_clean_tsv is using
 protein_IDs = 'UniProt (SwissProt) Primary ID of Target Chain'
 protein_sequence = 'BindingDB Target Chain  Sequence'
 ligand_IDs = 'ChEMBL ID of Ligand'
