@@ -1,4 +1,4 @@
-from process_inputs_to_clean import parse_config
+from process_inputs import parse_config
 import pandas as pd
 import ast   # to go from string to list while parsing calnames
 import math  # to calculate better chunk sizes
