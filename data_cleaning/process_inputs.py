@@ -4,9 +4,10 @@ import configparser
 def parse_config():
     config = configparser.ConfigParser()
     config.read("config.ini")
+    raw_transformation = config["PERFORM RAW TRANSFORMATION"].getboolean('transform')
     files = config["INPUT FILES"]
     output = config["OUTPUT FILE"]
     file_specifications = config['FILE SPECIFICATIONS']
-    params = config['PARAMETERS']
+    params = config['PARAMETERS']  # this will be part of the next step
 
-    return files, output, file_specifications, params
+    return raw_transformation, files, output, file_specifications, params

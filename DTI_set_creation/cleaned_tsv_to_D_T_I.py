@@ -1,4 +1,3 @@
-from process_inputs_to_DTI import parse_config
 import pandas as pd
 
 '''
