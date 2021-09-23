@@ -24,12 +24,10 @@ Whatever else comes to mind
 raw_transformation, files, output, specifications, params = parse_config()
 # files is writen as plural, however for now it only works with a single file
 
-print(raw_transformation)
+cleaned_file = output['cleaned_frame']
 
 if raw_transformation:
     path = files['bindingDB_file']
-    save_output = output['save_file']
-    output_file = output['file_name']
     sep = specifications['separator_one']
     cols = ast.literal_eval(specifications['colnames_one'])
 
@@ -41,7 +39,6 @@ if raw_transformation:
     Those having multiple/unknown Kd values were removed
     '''
 
-
     cleaned_frame = pd.DataFrame(columns=cols)
 
     chunksize = math.ceil(len(list(open(path)))/5)  # allows handeling large sets of input data
@@ -49,17 +46,51 @@ if raw_transformation:
                              engine='python'):
         chunk = chunk[chunk['Target Source Organism According to Curator or DataSource'] == "Homo sapiens"]
         chunk = chunk.dropna(how='any', subset=['PubChem CID'])
-        chunk = chunk.dropna(how='any', subset=['UniProt (SwissProt) Primary ID of Target Chain'])  # might need expanding
+        chunk = chunk.dropna(how='any', subset=['UniProt (SwissProt) Primary ID of Target Chain'])
         chunk = chunk.dropna(how='any', subset=['ChEMBL ID of Ligand'])
         chunk['EC50 (nM)'] = pd.to_numeric(chunk['EC50 (nM)'], errors='coerce')
         chunk = chunk.dropna(how='any', subset=['EC50 (nM)'])
         cleaned_frame = pd.concat([cleaned_frame, chunk])
-
-
-    cleaned_frame.to_csv(output_file, sep='\t')
-
-    if not save_output:
-        os.remove(output_file)
+    # this needs to be adjusted to the config file
+    cleaned_frame.to_csv(cleaned_file, sep='\t')
 
 # PART 2
 # move the other file here
+
+path = cleaned_file
+sep = '\t'  # should come from config
+
+protein_IDs = specifications['protein_IDs']
+protein_sequence = specifications['protein_sequence']
+ligand_IDs = specifications['ligand_IDs']
+ligand_SMILE = specifications['ligand_SMILE']
+interaction_value = specifications['interaction_value']
+
+f = open(output['fasta_file'], 'w')
+d = open(output['ligand_file'], 'w')
+
+file = pd.read_csv(filepath_or_buffer=path, sep=sep, engine='python')
+print(file)
+
+for index, row in file.iterrows():
+
+    f.write(">"+row[protein_IDs]+"\n")
+    i = 0
+    while i < len(row[protein_sequence]):
+        if i % 40 != 39:
+            f.write(row[protein_sequence][i])
+            i += 1
+        else:
+            f.write(row[protein_sequence][i])
+            f.write("\n")
+            i += 1
+    if i % 40 != 0:
+        f.write("\n")
+
+    d.write(row[ligand_IDs]+"\t"+row[ligand_SMILE]+"\n")
+
+interactions = file.pivot_table(index=ligand_IDs, columns=protein_IDs, values=interaction_value, aggfunc='sum')
+interactions.to_csv(output['interaction_file'], sep='\t')
+
+f.close()
+d.close()

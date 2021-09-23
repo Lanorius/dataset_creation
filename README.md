@@ -3,27 +3,31 @@ I am creating a dataset for Drug-Target-Interaction (DTI) problems.
 
 WORK IN PROGRESS
 
-data_cleaning:
-process_inputs_to_clean.py is the main script
-The current plan is for it to do the following steps
-	- Take a version of bindingDB_all.tsv or similar data 
-	- Perform a cleanup of the data 
-	(this is broadly defined, since I am currently researching which steps are reasonable, but will also result in a large enough dataset for DTI problems)
-		+ Removing sequences that are too similar (using CD-Hit, work in progress)
-		+ Removing SMILES that have too similar fingerprints (work in progress)
-	- Allow specification in the config file to specify how much similarity is allowed
-	
-In the case that more sources of DTI data are found the script will be changed to work with them as well if the time allows it.
-Ideally, multiple sources of data will be combinable.
+Part 1 data_cleaning:
+
+As a prerequist, the user has to provide a .csv or .tsv file that has the following columns:
+protein_IDs
+protein_sequence
+ligand_IDs
+ligand_SMILE
+interaction_value (like Kd, Ki, Kiba Scores)
+
+Some databases have additional columns that specify sequences are multiprotein complexes are involved in binding. These should also be removed beforehand.
 
 
-DTI_set_creation:
-cleaned_tsv_to_D_T_I.py takes the cleaned tsv and divides it into:
-	-a .fasta file for the proteins
-	-a file for the ligands
-	-an interaction file 
-The first two files can then be used to create embeddings or other representations for the final DTI prediction. 
+raw_input_to_raw_DTI_ready.py:
+In the config file the input .csv/.tsv and the expected columns have to be specified, as well as the names of the output files.
 
-building_pieces:
-This folder holds scripts that I used to piece together the actual clean up script. 
-Statistics on the data were also created using these scripts.
+The current version removes all missing data and throws out all rows that have ambiguous entries.
+
+Four files are given as output:
+A new .tsv file that includes only rows with usable raw data. This means data that still requires redundancy reduction for both the Drugs and the Targets.
+A .fasta file with the protein sequences.
+A file with the ligand IDs and SMILES.
+Another .tsv file with the interaction matrix.
+
+
+Part 2 double clustering:
+		+ Removing sequences that are too similar and drawing representatives (using CD-Hit, work in progress) 
+		+ Removing SMILES that have too similar fingerprints by calculating Jaccard distances and drawing representatives (work in progress)
+		+ Averaging over interactions where multiple representative interactions take place
