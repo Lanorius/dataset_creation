@@ -23,6 +23,7 @@ Whatever else comes to mind
 # Loading the data
 raw_transformation, files, output, specifications, params = parse_config()
 # files is writen as plural, however for now it only works with a single file
+# params will very likely be moved to another file
 
 cleaned_file = output['cleaned_frame']
 
