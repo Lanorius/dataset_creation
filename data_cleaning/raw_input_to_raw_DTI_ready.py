@@ -2,7 +2,8 @@ from process_inputs import parse_config
 import pandas as pd
 import ast   # to go from string to list while parsing calnames
 import math  # to calculate better chunk sizes
-import os  # to specify if the user wants to keep the cleaned TSV
+import os  # to specify if the user wants to keep the cleaned TSV and to remove temp_drugs.txt
+import csv  # to transform the output drug file into a csv
 
 '''
 One idea would be to expect the user to do a very basic level of preprocessing
@@ -26,6 +27,11 @@ raw_transformation, files, output, specifications, params = parse_config()
 # params will very likely be moved to another file
 
 cleaned_file = output['cleaned_frame']
+
+if raw_transformation:
+    print("Part 1: Perfoming raw transformation.")
+else:
+    print("Part 1: Skipping raw transformation.")
 
 if raw_transformation:
     path = files['bindingDB_file']
@@ -58,6 +64,8 @@ if raw_transformation:
 # PART 2
 # move the other file here
 
+print("Part 2: Creating necessary files.")
+
 path = cleaned_file
 sep = '\t'  # should come from config
 
@@ -68,10 +76,9 @@ ligand_SMILE = specifications['ligand_SMILE']
 interaction_value = specifications['interaction_value']
 
 f = open(output['fasta_file'], 'w')
-d = open(output['ligand_file'], 'w')
+d = open('temp_drugs.txt', 'w')
 
 file = pd.read_csv(filepath_or_buffer=path, sep=sep, engine='python')
-print(file)
 
 for index, row in file.iterrows():
 
@@ -89,6 +96,11 @@ for index, row in file.iterrows():
         f.write("\n")
 
     d.write(row[ligand_IDs]+"\t"+row[ligand_SMILE]+"\n")
+
+# ensures the output is a csv file
+temp_drugs = pd.read_csv('temp_drugs.txt', sep='\t')
+temp_drugs.to_csv(output['ligand_file'], sep='\t')
+os.remove('temp_drugs.txt')
 
 interactions = file.pivot_table(index=ligand_IDs, columns=protein_IDs, values=interaction_value, aggfunc='sum')
 interactions.to_csv(output['interaction_file'], sep='\t')
