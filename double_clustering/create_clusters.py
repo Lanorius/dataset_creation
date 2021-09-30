@@ -1,27 +1,19 @@
-import numpy as np
 from process_inputs import parse_config
-from rdkit import Chem, DataStructs
+from rdkit import Chem, DataStructs  # everything fingerprint related
+from tqdm import tqdm  # shows progress of for loops
 import pandas as pd
-from tqdm import tqdm
+import numpy as np
+import subprocess  # to run CD-Hit
 
 tasks_to_perform, files, output, params = parse_config()
 
 
-# Part 1 create drug matrix
+# Part 0 create drug matrix | looks like this step isn't needed
 
-if tasks_to_perform[0]:
+if tasks_to_perform[0]:  # this might not be needed since RDKit will do the clustering for you
     print('Creating Drug Matrix')
-    drug_file = pd.read_csv(files['drug_file'], sep='\t', header=None)
 
-    list_of_SMILES = list(dict.fromkeys(list(drug_file[2])))  # removes duplicates
-    length_of_list = len(list_of_SMILES)
-
-    '''
-    # There is so much redundancy here... 
-    print(len(list_of_SMILES))
-    print(len(list(drug_file[2])))
-    '''
-
+'''
     # this is a matrix that will hold the fingerprint similarities of the SMILES
     similarity_df = pd.DataFrame(columns=list_of_SMILES, index=list_of_SMILES)
 
@@ -41,26 +33,42 @@ if tasks_to_perform[0]:
     similarity_df.to_csv(path_or_buf=output['drug_matrix'], sep='\t')
 else:
     print('Skipping Drug Matrix')
+    similarity_df = pd.read_csv(output['drug_matrix'], sep='\t')
+    print(similarity_df)
+    print(similarity_df.shape)
+'''
 
-
-# Part 2 create drug cluster
+# Part 1 create drug cluster
 
 if tasks_to_perform[1]:
     print('Creating Drug Cluster')
 
+    drug_file = pd.read_csv(files['drug_file'], sep=' ', header=None).drop_duplicates(keep='first').reset_index()
+
+    list_of_SMILES = list(drug_file[0])  # removes duplicates
+    length_of_list = len(list_of_SMILES)
+
+    print(list_of_SMILES)
+    print(length_of_list)
+    # also in rdkit
 else:
     print('Skipping Drug Cluster')
 
-# Part 3 create target cluster
+# Part 2 create target cluster
 
 if tasks_to_perform[2]:
     print('Creating Target Cluster')
 
+    # running CD-hit
+    outside_python = "cd-hit -i "+files['target_file']+" -o "+output['target_cluster']
+    subprocess.run(outside_python, shell=True)
+    outside_python = "clstr2txt.pl "+output['target_cluster']+".clstr > " + output['target_representatives']
+    subprocess.run(outside_python, shell=True)
 else:
     print('Skipping Target Cluster')
 
 
-# Part 4 update drug target interactions
+# Part 3 update drug target interactions
 
 if tasks_to_perform[3]:
     print('Updating Drug Target Interactions')
