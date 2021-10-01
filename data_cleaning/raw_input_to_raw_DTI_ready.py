@@ -96,7 +96,9 @@ for index, row in file.iterrows():
     d.write(row[ligand_SMILE]+" "+row[ligand_IDs]+"\n")
 
 # ensures the output is a csv file
-temp_drugs = pd.read_csv('temp_drugs.txt', sep=' ')
+# all duplicate lines are removed here from the drugs as well
+temp_drugs = pd.read_csv('temp_drugs.txt', sep=' ').drop_duplicates(keep='first').reset_index()
+temp_drugs = temp_drugs.iloc[:, 1:]
 temp_drugs.to_csv(output['drug_file'], sep=' ', index=False)
 os.remove('temp_drugs.txt')
 
