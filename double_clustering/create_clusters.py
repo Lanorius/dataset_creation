@@ -8,22 +8,19 @@ import subprocess  # to run CD-Hit and mayachemtools
 tasks_to_perform, files, output, params = parse_config()
 
 
-# Part 0 create drug matrix | looks like this step isn't needed
-
-if tasks_to_perform[0]:  # this might not be needed since RDKit will do the clustering for you
-    print('Creating Drug Matrix')
-
 # Part 1 create drug cluster
 
-if tasks_to_perform[1]:
+if tasks_to_perform[0]:
     print('Creating Drug Cluster')
 
     # drug_file = pd.read_csv(files['drug_file'], sep=' ', header=None)
     # for this part you need the mayachemtools which you can find here:
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
-    clustering_process = '../../mayachemtools/bin/RDKitClusterMolecules.py --butinaReordering=yes -i ' \
-                         + files['drug_file'] + ' -o ' + output['drug_cluster']
+    clustering_process = '../../mayachemtools/bin/RDKitClusterMolecules.py' + \
+                         ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
+                         ' --butinaReordering=yes ' + \
+                         '-i ' + files['drug_file'] + ' -o ' + output['drug_cluster']
 
     subprocess.call(clustering_process, shell=True)
 
@@ -32,11 +29,23 @@ else:
 
 # Part 2 create target cluster
 
-if tasks_to_perform[2]:
+if tasks_to_perform[1]:
     print('Creating Target Cluster')
 
     # running CD-hit
-    outside_python = "cd-hit -i "+files['target_file']+" -o "+output['target_cluster']
+    seq_sim = float(params['sequence_similarity'])
+    if seq_sim < 0.4:
+        print('Threshold for sequence similarity needs to be at least 0.4.')
+
+    sim_dict = {0.5: 2, 0.6: 3, 0.7: 4}  # CD-Hit suggests to use these word sizes
+    word_size = 5
+    for i in sim_dict:
+        if i > seq_sim:
+            word_size = sim_dict[i]
+            break
+
+    outside_python = "cd-hit -i " + files['target_file'] + " -o "+output['target_cluster'] + \
+                     " -c " + params['sequence_similarity'] + " -n " + str(word_size)
     subprocess.run(outside_python, shell=True)
     outside_python = "clstr2txt.pl "+output['target_cluster']+".clstr > " + output['target_representatives']
     subprocess.run(outside_python, shell=True)
