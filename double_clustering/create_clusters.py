@@ -13,31 +13,6 @@ tasks_to_perform, files, output, params = parse_config()
 if tasks_to_perform[0]:  # this might not be needed since RDKit will do the clustering for you
     print('Creating Drug Matrix')
 
-'''
-    # this is a matrix that will hold the fingerprint similarities of the SMILES
-    similarity_df = pd.DataFrame(columns=list_of_SMILES, index=list_of_SMILES)
-
-    ms = [Chem.MolFromSmiles(x) for x in list_of_SMILES]
-    fps = [Chem.RDKFingerprint(x) for x in ms]
-
-    # filling the matrix
-    for i in tqdm(range(length_of_list)):
-        for j in range(length_of_list):
-            if i < j:
-                similarity_df.iloc[j, i] = np.nan
-            elif i == j:
-                similarity_df.iloc[j, i] = 0
-            else:
-                similarity_df.iloc[j, i] = DataStructs.FingerprintSimilarity(fps[i], fps[j])
-
-    similarity_df.to_csv(path_or_buf=output['drug_matrix'], sep='\t')
-else:
-    print('Skipping Drug Matrix')
-    similarity_df = pd.read_csv(output['drug_matrix'], sep='\t')
-    print(similarity_df)
-    print(similarity_df.shape)
-'''
-
 # Part 1 create drug cluster
 
 if tasks_to_perform[1]:
