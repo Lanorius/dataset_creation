@@ -49,6 +49,11 @@ if tasks_to_perform[1]:
     subprocess.run(outside_python, shell=True)
     outside_python = "clstr2txt.pl "+output['target_cluster']+".clstr > " + output['target_representatives']
     subprocess.run(outside_python, shell=True)
+
+    # removing duplicate rows from the target_representative file
+    temp_target_reps = pd.read_csv(output['target_representatives'], sep='\t')
+    temp_target_reps = temp_target_reps.drop_duplicates(subset='id', keep="first")
+    temp_target_reps.to_csv(output['target_representatives'], sep='\t', index=False)
 else:
     print('Skipping Target Cluster')
 
@@ -57,6 +62,7 @@ else:
 
 if tasks_to_perform[2]:
     print('Updating Drug Target Interactions')
+
 
 else:
     print('Skipping Drug Target Interaction Update')
