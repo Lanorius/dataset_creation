@@ -1,8 +1,8 @@
 from process_inputs import parse_config
-from rdkit import Chem, DataStructs  # everything fingerprint related
-from tqdm import tqdm  # shows progress of for loops
+# from rdkit import Chem, DataStructs  # everything fingerprint related
+# from tqdm import tqdm  # shows progress of for loops
 import pandas as pd
-import numpy as np
+# import numpy as np
 import subprocess  # to run CD-Hit and mayachemtools
 
 tasks_to_perform, files, output, params = parse_config()
@@ -20,7 +20,7 @@ if tasks_to_perform[0]:
     clustering_process = '../../mayachemtools/bin/RDKitClusterMolecules.py' + \
                          ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
                          ' --butinaReordering=yes ' + \
-                         '-i ' + files['drug_file'] + ' -o ' + output['drug_cluster']
+                         '-i ' + files['drug_file'] + ' -o ' + output['drug_representatives']
 
     subprocess.call(clustering_process, shell=True)
 
@@ -63,6 +63,26 @@ else:
 if tasks_to_perform[2]:
     print('Updating Drug Target Interactions')
 
+    # this works for both drugs and targets because the outputs
+    # of Mayachemtools and CD-Hit accidentally use similar columns.
+    def make_dict(data):
+        out_dict = {}
+        clusternumber = ""
+        clusterrep = ""
+        for i in range(data.shape[0]):
+            print("here")
+            if clusternumber != data.iat[i, 2]:
+                clusternumber = data.iat[i, 2]
+                clusterrep = data.iat[i, 1]
+                out_dict.update({clusterrep: clusterrep})
+            else:
+                out_dict.update({data.iat[i, 1]: clusterrep})
+        return out_dict
+
+    drug_dict = make_dict(output['drug_representatives'])
+    target_dict = make_dict(output['target_representatives'])
+
+    
 
 else:
     print('Skipping Drug Target Interaction Update')
