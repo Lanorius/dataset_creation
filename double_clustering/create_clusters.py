@@ -1,8 +1,7 @@
 from process_inputs import parse_config
-# from rdkit import Chem, DataStructs  # everything fingerprint related
-# from tqdm import tqdm  # shows progress of for loops
+from tqdm import tqdm  # shows progress of for loops
 import pandas as pd
-# import numpy as np
+import numpy as np
 import subprocess  # to run CD-Hit and mayachemtools
 
 tasks_to_perform, files, output, params = parse_config()
@@ -63,26 +62,94 @@ else:
 if tasks_to_perform[2]:
     print('Updating Drug Target Interactions')
 
+    # Make_dict creates dictionaries to know which drug/target is the representative.
+    # Also creates lists of these representatives which will be used as row and col-names.
+
     # this works for both drugs and targets because the outputs
     # of Mayachemtools and CD-Hit accidentally use similar columns.
     def make_dict(data):
         out_dict = {}
+        rows_or_cols = []
         clusternumber = ""
         clusterrep = ""
-        for i in range(data.shape[0]):
-            print("here")
-            if clusternumber != data.iat[i, 2]:
-                clusternumber = data.iat[i, 2]
-                clusterrep = data.iat[i, 1]
+        for item in tqdm(range(data.shape[0])):
+            if clusternumber != data.iat[item, 2]:
+                clusternumber = data.iat[item, 2]
+                clusterrep = data.iat[item, 1]
+                rows_or_cols += [clusterrep]
                 out_dict.update({clusterrep: clusterrep})
             else:
-                out_dict.update({data.iat[i, 1]: clusterrep})
-        return out_dict
+                out_dict.update({data.iat[item, 1]: clusterrep})
+        return rows_or_cols, out_dict
 
-    drug_dict = make_dict(output['drug_representatives'])
-    target_dict = make_dict(output['target_representatives'])
+    row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives']))
+    col_names, target_dict = make_dict(pd.read_csv(output['target_representatives'], sep='\t', on_bad_lines='skip'))
 
-    
+    print(type(drug_dict['CHEMBL282279']))
+    # for i in target_dict:
+    #    if not isinstance(target_dict[i], str):
+    #        print(type(target_dict[i]))
+
+    # These two empty frames will be used to create the new averaged clean interaction frame.
+    df_a = pd.DataFrame(0.0, columns=col_names, index=row_names)
+    df_b = pd.DataFrame(0.0, columns=col_names, index=row_names)
+    # you can change that to take min or max instead of the average, or experiment even further
+
+    print(type(type(df_a.at['CHEMBL282279', 'P78527'])))
+    print(type(df_a.at['CHEMBL1467585CHEMBL24077', 'P78527']))
+
+    b = 0
+    g = 0
+    for index, _ in df_a.iterrows():
+        if isinstance(df_a.at[index, 'P78527'], pd.core.series.Series):
+            b += 1
+            print(index, g)
+        g += 1
+    print(g, b)
+
+    '''
+    def update_interactions_(data, frame_a, frame_b, dict_of_drugs, dict_of_targets): # remove the underscore when putting it back in.
+        for name, _ in tqdm(data.iteritems()):
+            for index, _ in data.iterrows():
+                # if not np.isnan(data.at[index, name]):
+                if type(data.at[index, name]) == float:
+                    frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
+                    frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
+        frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
+        frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
+        for name, _ in frame_a.iteritems():
+            for index, _ in frame_a.iterrows():
+                print(frame_a.at[index, name])
+                if frame_a.at[index, name] != 0:
+                    frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
+                else:
+                    frame_a.at[index, name] = np.nan
+
+        return frame_a
+
+    frame_a = pd.read_csv('../intermediate_files/frame_a.csv', sep='\t')
+    frame_b = pd.read_csv('../intermediate_files/frame_b.csv', sep='\t')
+    i = 0
+
+    def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, i):
+        for name, _ in frame_a.iteritems():
+            for index, _ in frame_a.iterrows():
+                i += 1
+                print(index, name, i)
+                print(frame_a.at[index, name])
+                if frame_a.at[index, name] != 0:
+                    frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
+                else:
+                    frame_a.at[index, name] = np.nan
+
+        return frame_a
+
+    interaction_file = pd.read_csv(files['interaction_file'], sep='\t')
+    # cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
+    cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict, i)
+    cleaned_interactions.to_csv(output['cleaned_interaction_file'], sep='\t')
 
 else:
     print('Skipping Drug Target Interaction Update')
+    
+    '''
