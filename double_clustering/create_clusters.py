@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import subprocess  # to run CD-Hit and mayachemtools
 
+import re #bug fixing
+
 tasks_to_perform, files, output, params = parse_config()
 
 
@@ -67,6 +69,7 @@ if tasks_to_perform[2]:
 
     # this works for both drugs and targets because the outputs
     # of Mayachemtools and CD-Hit accidentally use similar columns.
+    # If either one of these tools is replaced this function might not work for the output anymore.
     def make_dict(data):
         out_dict = {}
         rows_or_cols = []
@@ -82,31 +85,41 @@ if tasks_to_perform[2]:
                 out_dict.update({data.iat[item, 1]: clusterrep})
         return rows_or_cols, out_dict
 
-    row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives']))
+    row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives'], sep=',', on_bad_lines='skip'))
     col_names, target_dict = make_dict(pd.read_csv(output['target_representatives'], sep='\t', on_bad_lines='skip'))
 
-    print(type(drug_dict['CHEMBL282279']))
-    # for i in target_dict:
-    #    if not isinstance(target_dict[i], str):
-    #        print(type(target_dict[i]))
+    #print(type(drug_dict['CHEMBL282279']))
+    #for i in drug_dict:
+    #    if not isinstance(drug_dict[i], str):
+    #        print(type(drug_dict[i]))
+
+    print(all([isinstance(i, str) for i in row_names]))
+    print(any([re.search(r'\W', i) for i in row_names]))
 
     # These two empty frames will be used to create the new averaged clean interaction frame.
-    df_a = pd.DataFrame(0.0, columns=col_names, index=row_names)
-    df_b = pd.DataFrame(0.0, columns=col_names, index=row_names)
+    df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
+    df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     # you can change that to take min or max instead of the average, or experiment even further
-
-    print(type(type(df_a.at['CHEMBL282279', 'P78527'])))
+    df_a.loc[:, :] = 0.
+    print(type(df_a.at['CHEMBL282279', 'P78527']))
     print(type(df_a.at['CHEMBL1467585CHEMBL24077', 'P78527']))
+
+    print(len(list(set(row_names))))
+    print(len(list(set(col_names))))
+    '''
+    print(df_a.head())
+    print(df_a.dtypes.value_counts())
+    print(df_a.T.dtypes.value_counts())
 
     b = 0
     g = 0
     for index, _ in df_a.iterrows():
-        if isinstance(df_a.at[index, 'P78527'], pd.core.series.Series):
+        if isinstance(df_a.at[index, 'K9N7C7'], pd.core.series.Series):
             b += 1
             print(index, g)
         g += 1
     print(g, b)
-
+    '''
     '''
     def update_interactions_(data, frame_a, frame_b, dict_of_drugs, dict_of_targets): # remove the underscore when putting it back in.
         for name, _ in tqdm(data.iteritems()):
