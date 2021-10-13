@@ -88,11 +88,6 @@ if tasks_to_perform[2]:
     row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives'], sep=',', on_bad_lines='skip'))
     col_names, target_dict = make_dict(pd.read_csv(output['target_representatives'], sep='\t', on_bad_lines='skip'))
 
-    #print(type(drug_dict['CHEMBL282279']))
-    #for i in drug_dict:
-    #    if not isinstance(drug_dict[i], str):
-    #        print(type(drug_dict[i]))
-
     print(all([isinstance(i, str) for i in row_names]))
     print(any([re.search(r'\W', i) for i in row_names]))
 
@@ -100,28 +95,8 @@ if tasks_to_perform[2]:
     df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     # you can change that to take min or max instead of the average, or experiment even further
-    df_a.loc[:, :] = 0.
-    print(type(df_a.at['CHEMBL282279', 'P78527']))
-    print(type(df_a.at['CHEMBL1467585CHEMBL24077', 'P78527']))
 
-    print(len(list(set(row_names))))
-    print(len(list(set(col_names))))
-    '''
-    print(df_a.head())
-    print(df_a.dtypes.value_counts())
-    print(df_a.T.dtypes.value_counts())
-
-    b = 0
-    g = 0
-    for index, _ in df_a.iterrows():
-        if isinstance(df_a.at[index, 'K9N7C7'], pd.core.series.Series):
-            b += 1
-            print(index, g)
-        g += 1
-    print(g, b)
-    '''
-    '''
-    def update_interactions_(data, frame_a, frame_b, dict_of_drugs, dict_of_targets): # remove the underscore when putting it back in.
+    def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
                 # if not np.isnan(data.at[index, name]):
@@ -144,7 +119,8 @@ if tasks_to_perform[2]:
     frame_b = pd.read_csv('../intermediate_files/frame_b.csv', sep='\t')
     i = 0
 
-    def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, i):
+    # this version was only for finding a bug. The bug has been found but wasn't solved yet
+    def update_interactions_(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, i):  # remove the underscore when putting it back in.
         for name, _ in frame_a.iteritems():
             for index, _ in frame_a.iterrows():
                 i += 1
@@ -158,11 +134,9 @@ if tasks_to_perform[2]:
         return frame_a
 
     interaction_file = pd.read_csv(files['interaction_file'], sep='\t')
-    # cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
-    cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict, i)
+    cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
+    # cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict, i)
     cleaned_interactions.to_csv(output['cleaned_interaction_file'], sep='\t')
 
 else:
     print('Skipping Drug Target Interaction Update')
-    
-    '''
