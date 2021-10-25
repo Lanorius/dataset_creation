@@ -88,14 +88,6 @@ if tasks_to_perform[2]:
     row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives'], sep=',', on_bad_lines='skip'))
     col_names, target_dict = make_dict(pd.read_csv(output['target_representatives'], sep='\t', on_bad_lines='skip'))
 
-    # print(len(row_names))
-    # print(len(list(set(row_names))))
-
-    row_names = list(set(row_names))
-    print(len(row_names))  # not needed
-    # RDKit has trouble with tautomers and didn't cluster several drugs. Pandas changes the data type of all rows
-    # with row_names that are doubles, which later causes an error.
-
     # These two empty frames will be used to create the new averaged clean interaction frame.
     df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
@@ -117,7 +109,6 @@ if tasks_to_perform[2]:
                     frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
                 else:
                     frame_a.at[index, name] = np.nan
-
         return frame_a
 
     # frame_a = pd.read_csv('../intermediate_files/frame_a.csv', sep='\t')
