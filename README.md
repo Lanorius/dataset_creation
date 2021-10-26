@@ -1,5 +1,6 @@
 # dataset_creation
-I am creating a dataset for Drug-Target-Interaction (DTI) problems.
+
+This repository contains the code for my Master Thesis. The idea is to use common tools in Bioinformatics, like RDKit and CD-Hit, to process raw data, in hope of improving its quality for Drug-Target-Interaction prediction.
 
 WORK IN PROGRESS
 

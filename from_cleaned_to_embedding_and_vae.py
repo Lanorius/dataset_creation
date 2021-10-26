@@ -1,6 +1,9 @@
 import pandas as pd
 
 
+# This file represents the final step before we create embeddings and use the vae 
+# It belongs after the Updating Drug Target Interactions step in create_clusters.py
+
 # unclustered_targets.fasta files are the output of CD-Hit with 100% similarity
 file = open('intemediate_files/unclustered_targets_Kd.fasta','r')
 Lines = file.readlines()
@@ -50,5 +53,24 @@ print(interactions.shape)
 
 interactions.to_csv('intemediate_files/unclustered_interactions_Kd.csv', sep='\t')
 compounds.to_csv('intemediate_files/unclustered_compounds_Kd.csv', sep='\t', index=False)
+
+
+
+#Chemvae can't encode certain characters this file removes them. First I thought it is just the . character, but some others also don't work. The list might need expending, although I would suggest replacing chemvae.
+
+#This file is currently hard coded, but since it might be useful, I should perhaps generalize it.
+
+compound_file = pd.read_csv('unclustered_compounds_Kd.csv')
+interaction_file = pd.read_csv('unclustered_interactions_Kd.csv', sep='\t', index_col=['ChEMBL ID of Ligand'])
+
+for i in range(compound_file.shape[0]-1, 0, -1):
+	print(i)
+	if (compound_file.iat[i,0].find('.') != -1) or (compound_file.iat[i,0].find('e') != -1) or (compound_file.iat[i,0].find('i') != -1):
+		interaction_file = interaction_file.drop(index=compound_file.iat[i,1])
+		compound_file = compound_file.drop(index=compound_file.index[i])
+
+		
+compound_file.to_csv('unclustered_compounds_Kd_dot_free.csv', index=False)
+interaction_file.to_csv('unclustered_interactions_Kd_dot_free.csv', sep='\t')
 
 

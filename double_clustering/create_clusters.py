@@ -4,18 +4,20 @@ import pandas as pd
 import numpy as np
 import subprocess  # to run CD-Hit and mayachemtools
 
-import re #bug fixing
-
 tasks_to_perform, files, output, params = parse_config()
 
+'''
+raw input_to_raw_DTI_ready and create_cluster are separate scripts, because I am currently using separate
+environments for both for now
+'''
 
 # Part 1 create drug cluster
 
 if tasks_to_perform[0]:
     print('Creating Drug Cluster')
 
-    # drug_file = pd.read_csv(files['drug_file'], sep=' ', header=None)
-    # for this part you need the mayachemtools which you can find here:
+    # RDKit offers the tools necessary to cluster SMILES.
+    # For this part you need mayachemtools which uses RDKit and you can find it here:
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
     clustering_process = '../../mayachemtools/bin/RDKitClusterMolecules.py' + \
@@ -36,7 +38,7 @@ if tasks_to_perform[1]:
     # running CD-hit
     seq_sim = float(params['sequence_similarity'])
     if seq_sim < 0.4:
-        print('Threshold for sequence similarity needs to be at least 0.4.')
+        raise ValueError('Threshold for sequence similarity needs to be at least 0.4.')
 
     sim_dict = {0.5: 2, 0.6: 3, 0.7: 4}  # CD-Hit suggests to use these word sizes
     word_size = 5
@@ -66,9 +68,8 @@ if tasks_to_perform[2]:
 
     # Make_dict creates dictionaries to know which drug/target is the representative.
     # Also creates lists of these representatives which will be used as row and col-names.
-
     # this works for both drugs and targets because the outputs
-    # of Mayachemtools and CD-Hit accidentally use similar columns.
+    # of Mayachemtools and CD-Hit accidentally have a similar column structure.
     # If either one of these tools is replaced this function might not work for the output anymore.
     def make_dict(data):
         out_dict = {}
