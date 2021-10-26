@@ -12,6 +12,7 @@ environments for both for now
 '''
 
 # Part 1 create drug cluster
+
 if tasks_to_perform[0]:
     print('Creating Drug Cluster')
 
@@ -30,6 +31,7 @@ else:
     print('Skipping Drug Cluster')
 
 # Part 2 create target cluster
+
 if tasks_to_perform[1]:
     print('Creating Target Cluster')
 
@@ -84,6 +86,14 @@ if tasks_to_perform[2]:
                 out_dict.update({data.iat[item, 1]: clusterrep})
         return rows_or_cols, out_dict
 
+    row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives'], sep=',', on_bad_lines='skip'))
+    col_names, target_dict = make_dict(pd.read_csv(output['target_representatives'], sep='\t', on_bad_lines='skip'))
+
+    # These two empty frames will be used to create the new averaged clean interaction frame.
+    df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
+    df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
+    # you can change that to take min or max instead of the average, or experiment even further
+
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
@@ -102,31 +112,27 @@ if tasks_to_perform[2]:
                     frame_a.at[index, name] = np.nan
         return frame_a
 
+    # frame_a = pd.read_csv('../intermediate_files/frame_a.csv', sep='\t')
+    # frame_b = pd.read_csv('../intermediate_files/frame_b.csv', sep='\t')
+    i = 0
 
-    row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives'], sep=',', on_bad_lines='skip'))
-    col_names, target_dict = make_dict(pd.read_csv(output['target_representatives'], sep='\t', on_bad_lines='skip'))
+    # this version was only for finding a bug. The bug has been found but wasn't solved yet
+    def update_interactions_(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, i):  # remove the underscore when putting it back in.
+        for name, _ in frame_a.iteritems():
+            for index, _ in frame_a.iterrows():
+                i += 1
+                print(index, name, i)
+                print(frame_a.at[index, name])
+                if frame_a.at[index, name] != 0:
+                    frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
+                else:
+                    frame_a.at[index, name] = np.nan
 
-    # These two empty frames will be used to create the new averaged clean interaction frame.
-    df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
-    df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
-    # you can change that to take min or max instead of the average, or experiment even further
+        return frame_a
 
-    # RDKit has an issue with tautomeres. Even at 100% similarity you would expect all the rows with the same compound,
-    # to cluster, but in some tautomere cases they don't. In these cases pandas changes the datatype of rows with
-    # repeating row_names to pd.core.series.Series.
-    # The worrisome part is, that we don't know if RDKit only fails at clustering tautomeres.
-    compounds_appearing_more_than_once = []
-    for i, _ in df_a.iterrows():
-        if type(df_a.at[i, df_a.columns[0]]) == pd.core.series.Series:
-            compounds_appearing_more_than_once += [i]
-
-    interaction_file = pd.read_csv(files['interaction_file'], sep='\t', header=0, index_col=0)
-
-    df_a = df_a.drop(compounds_appearing_more_than_once)
-    df_b = df_b.drop(compounds_appearing_more_than_once)
-    interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
-
+    interaction_file = pd.read_csv(files['interaction_file'], sep='\t')
     cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
+    # cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict, i)
     cleaned_interactions.to_csv(output['cleaned_interaction_file'], sep='\t')
 
 else:
