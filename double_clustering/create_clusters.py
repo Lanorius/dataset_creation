@@ -88,9 +88,12 @@ if tasks_to_perform[2]:
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
                 # if not np.isnan(data.at[index, name]):
-                if type(data.at[index, name]) == float:
-                    frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
-                    frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
+                if data.at[index, name] > 0:
+                    try:  # there is at least one key error in here. Not sure where it comes from
+                        frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
+                        frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
+                    except:
+                    	pass
         frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
         frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
         for name, _ in frame_a.iteritems():
