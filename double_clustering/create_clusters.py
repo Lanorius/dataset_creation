@@ -45,10 +45,10 @@ if tasks_to_perform[1]:
             word_size = sim_dict[i]
             break
 
-    outside_python = "cd-hit -i " + files['target_file'] + " -o "+output['target_cluster'] + \
+    outside_python = "cd-hit -i " + files['target_file'] + " -o " + output['target_cluster'] + \
                      " -c " + params['sequence_similarity'] + " -n " + str(word_size)
     subprocess.run(outside_python, shell=True)
-    outside_python = "clstr2txt.pl "+output['target_cluster']+".clstr > " + output['target_representatives']
+    outside_python = "clstr2txt.pl " + output['target_cluster'] + ".clstr > " + output['target_representatives']
     subprocess.run(outside_python, shell=True)
 
     # removing duplicate rows from the target_representative file
@@ -58,11 +58,11 @@ if tasks_to_perform[1]:
 else:
     print('Skipping Target Cluster')
 
-
 # Part 3 update drug target interactions
 
 if tasks_to_perform[2]:
     print('Updating Drug Target Interactions')
+
 
     # Make_dict creates dictionaries to know which drug/target is the representative.
     # Also creates lists of these representatives which will be used as row and col-names.
@@ -84,6 +84,7 @@ if tasks_to_perform[2]:
                 out_dict.update({data.iat[item, 1]: clusterrep})
         return rows_or_cols, out_dict
 
+
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
@@ -93,7 +94,9 @@ if tasks_to_perform[2]:
                         frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
                         frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
                     except:
-                    	pass
+                        print(index)
+                    # frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
+                    # frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
         frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
         frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
         for name, _ in frame_a.iteritems():
