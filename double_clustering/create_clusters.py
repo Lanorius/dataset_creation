@@ -1,3 +1,5 @@
+import traceback
+
 from process_inputs import parse_config
 from tqdm import tqdm  # shows progress of for loops
 import pandas as pd
@@ -86,6 +88,8 @@ if tasks_to_perform[2]:
 
 
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
+        key_errors = []
+        print('Done by: '+str(len(dict_of_drugs)))
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
                 # if not np.isnan(data.at[index, name]):
@@ -93,20 +97,18 @@ if tasks_to_perform[2]:
                     try:  # there is at least one key error in here. Not sure where it comes from
                         frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
                         frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
-                    except:
-                        print(index)
-                    # frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
-                    # frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
+                    except Exception:
+                        error_msg = traceback.format_exc()
+                        key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys 10
         frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
         frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
         for name, _ in frame_a.iteritems():
             for index, _ in frame_a.iterrows():
-                # print(frame_a.at[index, name])
                 if frame_a.at[index, name] != 0:
                     frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
                 else:
                     frame_a.at[index, name] = np.nan
-        return frame_a
+        return frame_a, key_errors
 
 
     row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives'], sep=',', on_bad_lines='skip'))
@@ -132,8 +134,15 @@ if tasks_to_perform[2]:
     df_b = df_b.drop(compounds_appearing_more_than_once)
     interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
 
-    cleaned_interactions = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
+    cleaned_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
     cleaned_interactions.to_csv(output['cleaned_interaction_file'], sep='\t')
+
+    # Saving the faulty indices to a separate file
+    if tasks_to_perform[3]:
+        file = open(output['key_errors'], 'w')
+        for faulty_index in key_Errors:
+            file.writelines([faulty_index+'\n'])
+        file.close()
 
 else:
     print('Skipping Drug Target Interaction Update')
