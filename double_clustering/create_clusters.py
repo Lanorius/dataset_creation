@@ -24,7 +24,7 @@ if tasks_to_perform[0]:
     clustering_process = '../../mayachemtools/bin/RDKitClusterMolecules.py' + \
                          ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
                          ' --butinaReordering=yes ' + \
-                         '-i ' + files['drug_file'] + ' -o ' + output['drug_representatives']
+                         '-i ' + files['drug_file'] + ' -o ' + output['intermediate_drug_representatives']
 
     subprocess.call(clustering_process, shell=True)
 
@@ -99,9 +99,9 @@ if tasks_to_perform[2]:
                         frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
                     except Exception:
                         error_msg = traceback.format_exc()
-                        key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys 10
-        #frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
-        #frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
+                        key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
+        # frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
+        # frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
         print('Done by: ' + str(len(dict_of_targets)))
         for name, _ in tqdm(frame_a.iteritems()):
             for index, _ in frame_a.iterrows():
@@ -110,7 +110,6 @@ if tasks_to_perform[2]:
                 else:
                     frame_a.at[index, name] = np.nan
         return frame_a, key_errors
-
 
     row_names, drug_dict = make_dict(pd.read_csv(output['drug_representatives'], sep=',', on_bad_lines='skip'))
     col_names, target_dict = make_dict(pd.read_csv(output['target_representatives'], sep='\t', on_bad_lines='skip'))
@@ -135,19 +134,41 @@ if tasks_to_perform[2]:
     df_b = df_b.drop(compounds_appearing_more_than_once)
     interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
 
-    cleaned_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
-    cleaned_interactions.to_csv(output['cleaned_interaction_file'], sep='\t')
+    intermediate_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
+    intermediate_interactions.to_csv(output['intermediate_interaction_file'], sep='\t')
 
     # Saving faulty indices to a separate file
-    if tasks_to_perform[3]:
+    if tasks_to_perform[4]:
         file = open(output['key_errors'], 'w')
         file.write("Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n")
         for tautomere in compounds_appearing_more_than_once:
             file.writelines([compounds_appearing_more_than_once+'\n'])
-        file.write("\nDrug and Target ids that are not in any cluster.")
+        file.write("\nDrug and Target ids that are not in any cluster:\n")
         for faulty_index in key_Errors:
             file.writelines([faulty_index+'\n'])
         file.close()
 
 else:
     print('Skipping Drug Target Interaction Update')
+
+if tasks_to_perform[3]:
+    compound_file = pd.read_csv(output['intermediate_drug_representatives'], sep=',')
+    interaction_file = pd.read_csv(output['intermediate_interaction_file'], sep='\t', index_col=0)
+
+    for i in range(compound_file.shape[0] - 1, 0, -1):
+        if (compound_file.iat[i, 0].find('.') != -1) or (compound_file.iat[i, 0].find('e') != -1) or \
+                (compound_file.iat[i, 0].find('i') != -1):
+            print(compound_file.iat[i,1])
+            compound_file = compound_file.drop(index=compound_file.index[i])
+            try:
+                interaction_file = interaction_file.drop(index=compound_file.iat[i, 1])
+            except:
+                pass  # some might not be in the interaction file since they got clustered
+
+    compound_file.to_csv(output['drug_representatives'], sep=',', index=False)
+    interaction_file.to_csv(output['cleaned_interaction_file'], sep='\t')
+
+else:
+    print('Skipping the removal of Drugs with characters that ChemVAE can\'t encode.')
+    cleaned_interactions = pd.read_csv(output['intermediate_interaction_file'], sep='t')
+    cleaned_interactions.to_csv(output['cleaned_interaction_file'], sep='\t')
