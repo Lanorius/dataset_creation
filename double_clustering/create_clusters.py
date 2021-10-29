@@ -65,7 +65,6 @@ else:
 if tasks_to_perform[2]:
     print('Updating Drug Target Interactions')
 
-
     # Make_dict creates dictionaries to know which drug/target is the representative.
     # Also creates lists of these representatives which will be used as row and col-names.
     # this works for both drugs and targets because the outputs
@@ -86,10 +85,11 @@ if tasks_to_perform[2]:
                 out_dict.update({data.iat[item, 1]: clusterrep})
         return rows_or_cols, out_dict
 
-
+    # update interactions takes the clusteres and the dictionaries of the cluster ids and
+    # averages the interaction values for each cluster by using its members
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         key_errors = []
-        print('Done by: '+str(len(dict_of_drugs)))
+        print('Done by: '+str(len(dict_of_targets)))
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
                 # if not np.isnan(data.at[index, name]):
@@ -100,9 +100,10 @@ if tasks_to_perform[2]:
                     except Exception:
                         error_msg = traceback.format_exc()
                         key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys 10
-        frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
-        frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
-        for name, _ in frame_a.iteritems():
+        #frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
+        #frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
+        print('Done by: ' + str(len(dict_of_targets)))
+        for name, _ in tqdm(frame_a.iteritems()):
             for index, _ in frame_a.iterrows():
                 if frame_a.at[index, name] != 0:
                     frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
@@ -137,9 +138,13 @@ if tasks_to_perform[2]:
     cleaned_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
     cleaned_interactions.to_csv(output['cleaned_interaction_file'], sep='\t')
 
-    # Saving the faulty indices to a separate file
+    # Saving faulty indices to a separate file
     if tasks_to_perform[3]:
         file = open(output['key_errors'], 'w')
+        file.write("Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n")
+        for tautomere in compounds_appearing_more_than_once:
+            file.writelines([compounds_appearing_more_than_once+'\n'])
+        file.write("\nDrug and Target ids that are not in any cluster.")
         for faulty_index in key_Errors:
             file.writelines([faulty_index+'\n'])
         file.close()
