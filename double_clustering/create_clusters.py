@@ -155,15 +155,17 @@ if tasks_to_perform[3]:
     compound_file = pd.read_csv(output['intermediate_drug_representatives'], sep=',')
     interaction_file = pd.read_csv(output['intermediate_interaction_file'], sep='\t', index_col=0)
 
+    error_compounds = []
     for i in range(compound_file.shape[0] - 1, 0, -1):
         if (compound_file.iat[i, 0].find('.') != -1) or (compound_file.iat[i, 0].find('e') != -1) or \
                 (compound_file.iat[i, 0].find('i') != -1):
-            print(compound_file.iat[i,1])
             compound_file = compound_file.drop(index=compound_file.index[i])
             try:
                 interaction_file = interaction_file.drop(index=compound_file.iat[i, 1])
             except:
-                pass  # some might not be in the interaction file since they got clustered
+                if compound_file.iat[i,1] not in error_compounds:
+                    error_compounds += [compound_file.iat[i, 1]]
+    print(error_compounds)
 
     compound_file.to_csv(output['drug_representatives'], sep=',', index=False)
     interaction_file.to_csv(output['cleaned_interaction_file'], sep='\t')
