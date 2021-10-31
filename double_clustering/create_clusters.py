@@ -28,6 +28,8 @@ if tasks_to_perform[0]:
 
     subprocess.call(clustering_process, shell=True)
 
+    # TODO: Figure out why the error compounds exist, since every compound should be in a cluster.
+
 else:
     print('Skipping Drug Cluster')
 
@@ -160,6 +162,7 @@ if tasks_to_perform[3]:
         if (compound_file.iat[i, 0].find('.') != -1) or (compound_file.iat[i, 0].find('e') != -1) or \
                 (compound_file.iat[i, 0].find('i') != -1):
             compound_file = compound_file.drop(index=compound_file.index[i])
+            print(compound_file.iat[i, 1])
             try:
                 interaction_file = interaction_file.drop(index=compound_file.iat[i, 1])
             except:
