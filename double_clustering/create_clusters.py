@@ -165,7 +165,7 @@ if tasks_to_perform[3]:
             try:
                 interaction_file = interaction_file.drop(index=compound_file.iat[i, 1])
             except:
-                if compound_file.iat[i,1] not in error_compounds:
+                if compound_file.iat[i, 1] not in error_compounds:
                     error_compounds += [compound_file.iat[i, 1]]
     print(error_compounds)
     print(len(error_compounds))
