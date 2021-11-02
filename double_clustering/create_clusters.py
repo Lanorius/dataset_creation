@@ -162,13 +162,13 @@ if tasks_to_perform[3]:
         if (compound_file.iat[i, 0].find('.') != -1) or (compound_file.iat[i, 0].find('e') != -1) or \
                 (compound_file.iat[i, 0].find('i') != -1):
             compound_file = compound_file.drop(index=compound_file.index[i])
-            print(compound_file.iat[i, 1])
             try:
                 interaction_file = interaction_file.drop(index=compound_file.iat[i, 1])
             except:
                 if compound_file.iat[i,1] not in error_compounds:
                     error_compounds += [compound_file.iat[i, 1]]
     print(error_compounds)
+    print(len(error_compounds))
 
     compound_file.to_csv(output['drug_representatives'], sep=',', index=False)
     interaction_file.to_csv(output['cleaned_interaction_file'], sep='\t')
