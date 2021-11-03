@@ -10,8 +10,8 @@ def parse_config():
                         config["PERFORM SUB-STEPS"].getboolean('prepare_data_for_chemVAE'),
                         config["PERFORM SUB-STEPS"].getboolean('save_key_errors')]
 
-    files = config["INPUT FILES"]
+    file = config["INPUT FILES"]
     output = config["OUTPUT FILES"]
     params = config['PARAMETERS']
 
-    return tasks_to_perform, files, output, params
+    return tasks_to_perform, file, output, params
