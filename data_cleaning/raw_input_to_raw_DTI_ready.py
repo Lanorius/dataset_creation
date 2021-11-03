@@ -2,7 +2,7 @@ from process_inputs import parse_config
 import pandas as pd
 import ast   # to go from string to list while parsing col-names
 import math  # to calculate better chunk sizes
-import os  # to remove temp_drugs.txt
+import os  # to create a new directory folder if needed and remove temp_drugs.txt
 
 '''
 One idea would be to expect the user to do a very basic level of preprocessing
@@ -25,7 +25,8 @@ Whatever else comes to mind
 # Loading the data
 raw_transformation, file, output, file_specifications = parse_config()
 
-cleaned_file = output['cleaned_frame']
+if not os.path.isdir(file['path']):
+    os.mkdir(file['path'])
 
 if raw_transformation:
     print("Part 1: Performing raw transformation.")
@@ -33,9 +34,9 @@ else:
     print("Part 1: Skipping raw transformation.")
 
 # The raw transformation removes the most obvious bad data, like missing IDs, wrong interaction value formats, aso.
+sep = file_specifications['separator']
 if raw_transformation:
     path = file['bindingDB_file']
-    sep = file_specifications['separator']
     cols = [file_specifications['protein_IDs'], file_specifications['ligand_IDs'],
             file_specifications['protein_sequence'], file_specifications['ligand_SMILE'],
             file_specifications['interaction_value']]
@@ -52,22 +53,22 @@ if raw_transformation:
                                                                         errors='coerce')
         chunk = chunk.dropna(how='any', subset=[file_specifications['interaction_value']])
         cleaned_frame = pd.concat([cleaned_frame, chunk])
-    cleaned_frame.to_csv(cleaned_file, sep='\t')
+    cleaned_frame.to_csv(file['path']+output['cleaned_frame'], sep='\t')
 
 # PART 2
 
 print("Part 2: Creating required sub-files (fasta, compound file, interaction file).")
 
-path = cleaned_file
-sep = '\t'  # should come from config
-# sep = sep   # like this
+cleaned_frame_path = file['path']+output['cleaned_frame']
+# sep = '\t'  # should come from config
+sep = sep   # like this
 
-f = open(output['fasta_file'], 'w')
+f = open(file['path']+output['fasta_file'], 'w')
 d = open('temp_drugs.txt', 'w')
 
-file = pd.read_csv(filepath_or_buffer=path, sep=sep, engine='python')
+cleaned_frame_file = pd.read_csv(filepath_or_buffer=cleaned_frame_path, sep=sep, engine='python')
 
-for index, row in file.iterrows():
+for index, row in cleaned_frame_file.iterrows():
 
     f.write(">"+row[file_specifications['protein_IDs']]+"\n")
     i = 0
@@ -88,12 +89,14 @@ for index, row in file.iterrows():
 # with pd.pivot_table the interaction values of the rows and columns are aggregated
 temp_drugs = pd.read_csv('temp_drugs.txt', sep=' ').drop_duplicates(keep='first').reset_index()
 temp_drugs = temp_drugs.iloc[:, 1:]
-temp_drugs.to_csv(output['drug_file'], sep=' ', index=False)
+temp_drugs.to_csv(file['path']+output['drug_file'], sep=' ', index=False)
 os.remove('temp_drugs.txt')
 
-interactions = file.pivot_table(index=file_specifications['ligand_IDs'], columns=file_specifications['protein_IDs'],
-                                values=file_specifications['interaction_value'], aggfunc='sum')
-interactions.to_csv(output['interaction_file'], sep='\t')
+interactions = cleaned_frame_file.pivot_table(index=file_specifications['ligand_IDs'],
+                                              columns=file_specifications['protein_IDs'],
+                                              values=file_specifications['interaction_value'],
+                                              aggfunc='sum')
+interactions.to_csv(file['path']+output['interaction_file'], sep='\t')
 
 f.close()
 d.close()
