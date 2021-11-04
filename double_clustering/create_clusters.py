@@ -21,13 +21,33 @@ if tasks_to_perform[0]:
     # For this part you need mayachemtools which uses RDKit and you can find it here:
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
-    clustering_process = '../../mayachemtools/bin/RDKitClusterMolecules.py' + \
+    test_drugs = pd.read_csv(file['path']+file['drug_file'], index_col=1, sep=' ', header=None).index
+    test_drugs = list(set(test_drugs))
+    print(test_drugs[0])
+    print(len(test_drugs))
+
+
+
+    '''
+    clustering_process = params['mayachemtools_path'] + \
                          ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
                          ' --butinaReordering=yes ' + \
                          '-i ' + file['path']+file['drug_file'] + ' -o ' + \
                          file['path']+output['intermediate_drug_representatives']
 
     subprocess.call(clustering_process, shell=True)
+    '''
+
+    clustered_drugs = pd.read_csv(file['path']+output['intermediate_drug_representatives'], index_col=1, sep=',').index
+    clustered_drugs = list(set(clustered_drugs))
+    print(clustered_drugs[0])
+    print(len(clustered_drugs))
+
+    test_clustered = np.setdiff1d(test_drugs, clustered_drugs)
+    clustered_test = np.setdiff1d(clustered_drugs, test_drugs)
+
+    print(test_clustered)
+    print(clustered_test)
 
     # TODO: Figure out why the error compounds exist, since every compound should be in a cluster.
 
@@ -126,9 +146,9 @@ if tasks_to_perform[2]:
     df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     # you can change that to take min or max instead of the average, or experiment even further
 
-    # RDKit has an issue with tautomeres. Even at 100% similarity you would expect all the rows with the same compound,
+    # RDKit has an issue with tautomeres. Even at 100% similarity you would expect all instances of teh same compound,
     # to cluster, but in some tautomere cases they don't. In these cases pandas changes the datatype of rows with
-    # repeating row_names to pd.core.series.Series.
+    # repeating row_names to pd.core.series.Series
     # The worrisome part is, that we don't know if RDKit only fails at clustering tautomeres.
     compounds_appearing_more_than_once = []
     for i, _ in df_a.iterrows():
@@ -180,5 +200,5 @@ if tasks_to_perform[3]:
 
 else:
     print('Skipping the removal of Drugs with characters that ChemVAE can\'t encode.')
-    cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
-    cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
+    #cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
+    #cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
