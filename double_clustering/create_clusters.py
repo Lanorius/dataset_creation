@@ -95,20 +95,19 @@ if tasks_to_perform[2]:
     # this works for both drugs and targets because the outputs
     # of Mayachemtools and CD-Hit accidentally have a similar column structure.
     # If either one of these tools is replaced this function might not work for the output anymore.
-    def make_dict(data):  # make_dict is bugged
-        out_dict = {}
+    def make_dict_cd_hit(data):  # make_dict is bugged
         rows_or_cols = []
-        clusternumber = ""
-        clusterrep = ""
+        out_dict = {}
+        clusterrep = "No Protein"
         for item in tqdm(range(data.shape[0])):
-            if clusternumber != data.iat[item, 2]:
-                clusternumber = data.iat[item, 2]
+            print(data.iat[item, 4])
+            if data.iat[item, 4] == 1:
                 clusterrep = data.iat[item, 0]
-                print(clusterrep)
                 rows_or_cols += [clusterrep]
                 out_dict.update({clusterrep: clusterrep})
             else:
-                out_dict.update({data.iat[item, 1]: clusterrep})
+                out_dict.update({data.iat[item, 0]: clusterrep})
+
         return rows_or_cols, out_dict
 
     # update interactions takes the clusteres and the dictionaries of the cluster ids and
@@ -137,14 +136,12 @@ if tasks_to_perform[2]:
                     frame_a.at[index, name] = np.nan
         return frame_a, key_errors
 
-
     #row_names, drug_dict = make_dict(pd.read_csv(file['path'] + output['intermediate_drug_representatives'],
-    #                                             sep=','))
-    col_names, target_dict = make_dict(pd.read_csv(file['path'] + output['target_representatives'],
+    #                                             sep=','), 1)
+    col_names, target_dict = make_dict_cd_hit(pd.read_csv(file['path'] + output['target_representatives'],
                                                    sep='\t'))
     print(len(col_names))
     print(len(target_dict))
-    print(target_dict)
 
     # print(pd.read_csv(file['path'] + file['drug_file'], header=None).shape)
     # print(pd.read_csv(file['path'] + file['target_file']).shape)
