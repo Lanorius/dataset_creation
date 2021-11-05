@@ -21,24 +21,23 @@ if tasks_to_perform[0]:
     # For this part you need mayachemtools which uses RDKit and you can find it here:
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
-    test_drugs = pd.read_csv(file['path']+file['drug_file'], index_col=1, sep=' ', header=None).index
+    '''
+    test_drugs = pd.read_csv(file['path'] + file['drug_file'], index_col=1, sep=' ', header=None).index
     test_drugs = list(set(test_drugs))
     print(test_drugs[0])
     print(len(test_drugs))
-
-
-
     '''
+
     clustering_process = params['mayachemtools_path'] + \
                          ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
                          ' --butinaReordering=yes ' + \
-                         '-i ' + file['path']+file['drug_file'] + ' -o ' + \
-                         file['path']+output['intermediate_drug_representatives']
-
+                         '-i ' + file['path'] + file['drug_file'] + \
+                         ' -o ' + file['path'] + output['intermediate_drug_representatives']
     subprocess.call(clustering_process, shell=True)
-    '''
 
-    clustered_drugs = pd.read_csv(file['path']+output['intermediate_drug_representatives'], index_col=1, sep=',').index
+    '''
+    clustered_drugs = pd.read_csv(file['path'] + output['intermediate_drug_representatives'], index_col=1,
+                                  sep=',').index
     clustered_drugs = list(set(clustered_drugs))
     print(clustered_drugs[0])
     print(len(clustered_drugs))
@@ -48,8 +47,9 @@ if tasks_to_perform[0]:
 
     print(test_clustered)
     print(clustered_test)
-
+    '''
     # TODO: Figure out why the error compounds exist, since every compound should be in a cluster.
+    # The problem is not in steps one, two,
 
 else:
     print('Skipping Drug Cluster')
@@ -70,18 +70,18 @@ if tasks_to_perform[1]:
             word_size = sim_dict[i]
             break
 
-    outside_python = "cd-hit -i " + file['path']+file['target_file'] + " -o " + \
-                     file['path']+output['target_cluster'] + \
+    outside_python = "cd-hit -i " + file['path'] + file['target_file'] + " -o " + \
+                     file['path'] + output['target_cluster'] + \
                      " -c " + params['sequence_similarity'] + " -n " + str(word_size)
     subprocess.run(outside_python, shell=True)
-    outside_python = "clstr2txt.pl " + file['path']+output['target_cluster'] + ".clstr > " + \
-                     file['path']+output['target_representatives']
+    outside_python = "clstr2txt.pl " + file['path'] + output['target_cluster'] + ".clstr > " + \
+                     file['path'] + output['target_representatives']
     subprocess.run(outside_python, shell=True)
 
     # removing duplicate rows from the target_representative file
-    temp_target_reps = pd.read_csv(file['path']+output['target_representatives'], sep='\t')
+    temp_target_reps = pd.read_csv(file['path'] + output['target_representatives'], sep='\t')
     temp_target_reps = temp_target_reps.drop_duplicates(subset='id', keep="first")
-    temp_target_reps.to_csv(file['path']+output['target_representatives'], sep='\t', index=False)
+    temp_target_reps.to_csv(file['path'] + output['target_representatives'], sep='\t', index=False)
 else:
     print('Skipping Target Cluster')
 
@@ -95,7 +95,7 @@ if tasks_to_perform[2]:
     # this works for both drugs and targets because the outputs
     # of Mayachemtools and CD-Hit accidentally have a similar column structure.
     # If either one of these tools is replaced this function might not work for the output anymore.
-    def make_dict(data):
+    def make_dict(data):  # make_dict is bugged
         out_dict = {}
         rows_or_cols = []
         clusternumber = ""
@@ -103,7 +103,8 @@ if tasks_to_perform[2]:
         for item in tqdm(range(data.shape[0])):
             if clusternumber != data.iat[item, 2]:
                 clusternumber = data.iat[item, 2]
-                clusterrep = data.iat[item, 1]
+                clusterrep = data.iat[item, 0]
+                print(clusterrep)
                 rows_or_cols += [clusterrep]
                 out_dict.update({clusterrep: clusterrep})
             else:
@@ -114,7 +115,7 @@ if tasks_to_perform[2]:
     # averages the interaction values for each cluster by using its members
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         key_errors = []
-        print('Done by: '+str(len(dict_of_targets)))
+        print('Done by: ' + str(len(dict_of_targets)))
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
                 # if not np.isnan(data.at[index, name]):
@@ -136,6 +137,18 @@ if tasks_to_perform[2]:
                     frame_a.at[index, name] = np.nan
         return frame_a, key_errors
 
+
+    #row_names, drug_dict = make_dict(pd.read_csv(file['path'] + output['intermediate_drug_representatives'],
+    #                                             sep=','))
+    col_names, target_dict = make_dict(pd.read_csv(file['path'] + output['target_representatives'],
+                                                   sep='\t'))
+    print(len(col_names))
+    print(len(target_dict))
+    print(target_dict)
+
+    # print(pd.read_csv(file['path'] + file['drug_file'], header=None).shape)
+    # print(pd.read_csv(file['path'] + file['target_file']).shape)
+    '''
     row_names, drug_dict = make_dict(pd.read_csv(file['path']+output['intermediate_drug_representatives'],
                                                  sep=',', on_bad_lines='skip'))
     col_names, target_dict = make_dict(pd.read_csv(file['path']+output['target_representatives'],
@@ -144,7 +157,6 @@ if tasks_to_perform[2]:
     # These two empty frames will be used to create the new averaged clean interaction frame.
     df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
-    # you can change that to take min or max instead of the average, or experiment even further
 
     # RDKit has an issue with tautomeres. Even at 100% similarity you would expect all instances of teh same compound,
     # to cluster, but in some tautomere cases they don't. In these cases pandas changes the datatype of rows with
@@ -197,8 +209,8 @@ if tasks_to_perform[3]:
 
     compound_file.to_csv(file['path']+output['drug_representatives'], sep=',', index=False)
     interaction_file.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
-
+    '''
 else:
     print('Skipping the removal of Drugs with characters that ChemVAE can\'t encode.')
-    #cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
-    #cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
+    # cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
+    # cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
