@@ -95,26 +95,42 @@ if tasks_to_perform[2]:
     # this works for both drugs and targets because the outputs
     # of Mayachemtools and CD-Hit accidentally have a similar column structure.
     # If either one of these tools is replaced this function might not work for the output anymore.
-    def make_dict_cd_hit(data):  # make_dict is bugged
-        rows_or_cols = []
+    def make_dict_cd_hit(data):
+        cols = []  # targets are always the columns
         out_dict = {}
-        clusterrep = "No Protein"
+        clusterrep = "No Target"
         for item in tqdm(range(data.shape[0])):
-            print(data.iat[item, 4])
             if data.iat[item, 4] == 1:
                 clusterrep = data.iat[item, 0]
-                rows_or_cols += [clusterrep]
+                cols += [clusterrep]
                 out_dict.update({clusterrep: clusterrep})
             else:
                 out_dict.update({data.iat[item, 0]: clusterrep})
 
-        return rows_or_cols, out_dict
+        return cols, out_dict
+
+    def make_dict_mayachemtools(data):
+        rows = []  # drugs are always the rows
+        out_dict = {}
+        last_cluster = data.iat[0, 2]  # first cluster id
+        clusterrep = data.iat[0, 1]  # by mayechemtools logic the cluster center comes first
+        for item in tqdm(range(data.shape[0])):
+            current_cluster = data.iat[item, 2]
+            if last_cluster == current_cluster:
+                out_dict.update({data.iat[item, 1]: clusterrep})
+            else:
+                clusterrep = data.iat[item, 1]
+                rows += [clusterrep]
+                last_cluster = current_cluster
+                out_dict.update({clusterrep: clusterrep})
+
+        return rows, out_dict
 
     # update interactions takes the clusteres and the dictionaries of the cluster ids and
     # averages the interaction values for each cluster by using its members
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         key_errors = []
-        print('Done by: ' + str(len(dict_of_targets)))
+        # print('Done by: ' + str(len(dict_of_targets)))
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
                 # if not np.isnan(data.at[index, name]):
@@ -125,9 +141,8 @@ if tasks_to_perform[2]:
                     except Exception:
                         error_msg = traceback.format_exc()
                         key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
-        # frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
-        # frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
-        print('Done by: ' + str(len(dict_of_targets)))
+        frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
+        frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
         for name, _ in tqdm(frame_a.iteritems()):
             for index, _ in frame_a.iterrows():
                 if frame_a.at[index, name] != 0:
@@ -136,20 +151,14 @@ if tasks_to_perform[2]:
                     frame_a.at[index, name] = np.nan
         return frame_a, key_errors
 
-    #row_names, drug_dict = make_dict(pd.read_csv(file['path'] + output['intermediate_drug_representatives'],
-    #                                             sep=','), 1)
-    col_names, target_dict = make_dict_cd_hit(pd.read_csv(file['path'] + output['target_representatives'],
-                                                   sep='\t'))
-    print(len(col_names))
-    print(len(target_dict))
+    row_names, drug_dict = make_dict_mayachemtools(pd.read_csv(file['path'] +
+                                                               output['intermediate_drug_representatives'], sep=','))
+    col_names, target_dict = make_dict_cd_hit(pd.read_csv(file['path'] + output['target_representatives'], sep='\t'))
 
-    # print(pd.read_csv(file['path'] + file['drug_file'], header=None).shape)
-    # print(pd.read_csv(file['path'] + file['target_file']).shape)
     '''
-    row_names, drug_dict = make_dict(pd.read_csv(file['path']+output['intermediate_drug_representatives'],
-                                                 sep=',', on_bad_lines='skip'))
-    col_names, target_dict = make_dict(pd.read_csv(file['path']+output['target_representatives'],
-                                                   sep='\t', on_bad_lines='skip'))
+    print(len(row_names))
+    print(len(drug_dict))
+    '''
 
     # These two empty frames will be used to create the new averaged clean interaction frame.
     df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
@@ -164,6 +173,8 @@ if tasks_to_perform[2]:
         if type(df_a.at[i, df_a.columns[0]]) == pd.core.series.Series:
             compounds_appearing_more_than_once += [i]
 
+    print(compounds_appearing_more_than_once)
+
     interaction_file = pd.read_csv(file['path']+file['interaction_file'], sep='\t', header=0, index_col=0)
 
     df_a = df_a.drop(compounds_appearing_more_than_once)
@@ -174,14 +185,16 @@ if tasks_to_perform[2]:
     intermediate_interactions.to_csv(file['path']+output['intermediate_interaction_file'], sep='\t')
 
     # Saving faulty indices to a separate file
+    # There is a problem here
     if tasks_to_perform[4]:
-        key_error_file = open(file['path']+output['key_errors'], 'w')
-        key_error_file.write("Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n")
+        lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
         for tautomere in compounds_appearing_more_than_once:
-            key_error_file.writelines([compounds_appearing_more_than_once+'\n'])
-        key_error_file.write("\nDrug and Target ids that are not in any cluster:\n")
+            lines_to_write += [compounds_appearing_more_than_once+'\n']
+        lines_to_write += ["\nDrug and Target ids that are not in any cluster:\n"]
         for faulty_index in key_Errors:
-            key_error_file.writelines([faulty_index+'\n'])
+            lines_to_write += [faulty_index+'\n']
+        key_error_file = open(file['path'] + output['key_errors'], 'w')
+        key_error_file.writelines(lines_to_write)
         key_error_file.close()
 
 else:
@@ -206,8 +219,8 @@ if tasks_to_perform[3]:
 
     compound_file.to_csv(file['path']+output['drug_representatives'], sep=',', index=False)
     interaction_file.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
-    '''
+
 else:
     print('Skipping the removal of Drugs with characters that ChemVAE can\'t encode.')
-    # cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
-    # cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
+    cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
+    cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
