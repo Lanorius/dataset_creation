@@ -141,8 +141,8 @@ if tasks_to_perform[2]:
                     except Exception:
                         error_msg = traceback.format_exc()
                         key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
-        frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
-        frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
+        # frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
+        # frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
         for name, _ in tqdm(frame_a.iteritems()):
             for index, _ in frame_a.iterrows():
                 if frame_a.at[index, name] != 0:
@@ -172,8 +172,7 @@ if tasks_to_perform[2]:
     for i, _ in df_a.iterrows():
         if type(df_a.at[i, df_a.columns[0]]) == pd.core.series.Series:
             compounds_appearing_more_than_once += [i]
-
-    print(compounds_appearing_more_than_once)
+    compounds_appearing_more_than_once = list(set(compounds_appearing_more_than_once))
 
     interaction_file = pd.read_csv(file['path']+file['interaction_file'], sep='\t', header=0, index_col=0)
 
@@ -185,14 +184,14 @@ if tasks_to_perform[2]:
     intermediate_interactions.to_csv(file['path']+output['intermediate_interaction_file'], sep='\t')
 
     # Saving faulty indices to a separate file
-    # There is a problem here
-    if tasks_to_perform[4]:
+    if tasks_to_perform[2] and tasks_to_perform[3] and tasks_to_perform[4]:
         lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
         for tautomere in compounds_appearing_more_than_once:
-            lines_to_write += [compounds_appearing_more_than_once+'\n']
+            lines_to_write += [tautomere+'\n']
         lines_to_write += ["\nDrug and Target ids that are not in any cluster:\n"]
-        for faulty_index in key_Errors:
-            lines_to_write += [faulty_index+'\n']
+        key_Errors = list(set(key_Errors))
+        for key_Error in key_Errors:
+            lines_to_write += [key_Error+'\n']
         key_error_file = open(file['path'] + output['key_errors'], 'w')
         key_error_file.writelines(lines_to_write)
         key_error_file.close()
@@ -214,8 +213,11 @@ if tasks_to_perform[3]:
             except:
                 if compound_file.iat[i, 1] not in error_compounds:
                     error_compounds += [compound_file.iat[i, 1]]
-    print(error_compounds)
-    print(len(error_compounds))
+
+    compound_error_file = open(file['path'] + "/chemVAE_bad_compounds.txt", 'w')
+    for bad_compound in error_compounds:
+        compound_error_file.write(bad_compound+'\n')
+    compound_error_file.close()
 
     compound_file.to_csv(file['path']+output['drug_representatives'], sep=',', index=False)
     interaction_file.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
