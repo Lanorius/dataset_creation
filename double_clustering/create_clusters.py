@@ -21,35 +21,12 @@ if tasks_to_perform[0]:
     # For this part you need mayachemtools which uses RDKit and you can find it here:
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
-    '''
-    test_drugs = pd.read_csv(file['path'] + file['drug_file'], index_col=1, sep=' ', header=None).index
-    test_drugs = list(set(test_drugs))
-    print(test_drugs[0])
-    print(len(test_drugs))
-    '''
-
     clustering_process = params['mayachemtools_path'] + \
                          ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
                          ' --butinaReordering=yes ' + \
                          '-i ' + file['path'] + file['drug_file'] + \
                          ' -o ' + file['path'] + output['intermediate_drug_representatives']
     subprocess.call(clustering_process, shell=True)
-
-    '''
-    clustered_drugs = pd.read_csv(file['path'] + output['intermediate_drug_representatives'], index_col=1,
-                                  sep=',').index
-    clustered_drugs = list(set(clustered_drugs))
-    print(clustered_drugs[0])
-    print(len(clustered_drugs))
-
-    test_clustered = np.setdiff1d(test_drugs, clustered_drugs)
-    clustered_test = np.setdiff1d(clustered_drugs, test_drugs)
-
-    print(test_clustered)
-    print(clustered_test)
-    '''
-    # TODO: Figure out why the error compounds exist, since every compound should be in a cluster.
-    # The problem is not in steps one, two,
 
 else:
     print('Skipping Drug Cluster')
@@ -128,6 +105,7 @@ if tasks_to_perform[2]:
 
     # update interactions takes the clusteres and the dictionaries of the cluster ids and
     # averages the interaction values for each cluster by using its members
+    # TODO: add box-plots as an extra output, to see if the interaction values in a given cluster are similar
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         key_errors = []
         # print('Done by: ' + str(len(dict_of_targets)))
@@ -155,10 +133,6 @@ if tasks_to_perform[2]:
                                                                output['intermediate_drug_representatives'], sep=','))
     col_names, target_dict = make_dict_cd_hit(pd.read_csv(file['path'] + output['target_representatives'], sep='\t'))
 
-    '''
-    print(len(row_names))
-    print(len(drug_dict))
-    '''
 
     # These two empty frames will be used to create the new averaged clean interaction frame.
     df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
