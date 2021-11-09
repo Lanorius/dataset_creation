@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import subprocess  # to run CD-Hit and mayachemtools
 
+import matplotlib.pyplot as plt  # for the boxplots
+
 tasks_to_perform, file, output, params = parse_config()
 
 '''
@@ -105,7 +107,33 @@ if tasks_to_perform[2]:
 
     # update interactions takes the clusteres and the dictionaries of the cluster ids and
     # averages the interaction values for each cluster by using its members
-    # TODO: add box-plots as an extra output, to see if the interaction values in a given cluster are similar
+    # TODO: add box-plots outputs here
+    def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
+        key_errors = []
+        # print('Done by: ' + str(len(dict_of_targets)))
+        for name, _ in tqdm(data.iteritems()):
+            for index, _ in data.iterrows():
+                # if not np.isnan(data.at[index, name]):
+                if data.at[index, name] > 0:
+                    try:  # there is at least one key error in here. Not sure where it comes from
+                        frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += [data.at[index, name]]
+                        frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
+                    except Exception:
+                        error_msg = traceback.format_exc()
+                        key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
+        # frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
+        # frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
+        for name, _ in tqdm(frame_a.iteritems()):
+            for index, _ in frame_a.iterrows():
+                if len(frame_a.at[index, name]) > 1:
+                    #TODO: Put boxplots here
+                    frame_a.at[index, name] = sum(frame_a.at[index, name]) / frame_b.at[index, name]
+                else:
+                    frame_a.at[index, name] = np.nan
+        return frame_a, key_errors
+
+    #TODO: Don't touch this one, it works
+    '''
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         key_errors = []
         # print('Done by: ' + str(len(dict_of_targets)))
@@ -128,6 +156,7 @@ if tasks_to_perform[2]:
                 else:
                     frame_a.at[index, name] = np.nan
         return frame_a, key_errors
+    '''
 
     row_names, drug_dict = make_dict_mayachemtools(pd.read_csv(file['path'] +
                                                                output['intermediate_drug_representatives'], sep=','))
@@ -135,8 +164,13 @@ if tasks_to_perform[2]:
 
 
     # These two empty frames will be used to create the new averaged clean interaction frame.
-    df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
+    df_a = pd.DataFrame([0.0], columns=col_names, index=row_names, dtype=float)
     df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
+
+    # TODO: Leave these also alone
+    # These two empty frames will be used to create the new averaged clean interaction frame.
+    # df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
+    # df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
 
     # RDKit has an issue with tautomeres. Even at 100% similarity you would expect all instances of teh same compound,
     # to cluster, but in some tautomere cases they don't. In these cases pandas changes the datatype of rows with
