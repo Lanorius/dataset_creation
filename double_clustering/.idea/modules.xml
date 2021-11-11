@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../.idea/dataset_creation.iml" filepath="$PROJECT_DIR$/../.idea/dataset_creation.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/double_clustering.iml" filepath="$PROJECT_DIR$/.idea/double_clustering.iml" />
     </modules>
   </component>

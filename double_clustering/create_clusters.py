@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from process_inputs import parse_config
@@ -108,15 +109,18 @@ if tasks_to_perform[2]:
     # update interactions takes the clusteres and the dictionaries of the cluster ids and
     # averages the interaction values for each cluster by using its members
     # TODO: add box-plots outputs here
-    def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
+    '''
+    def update_interactions(path, data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
+        path = path + '/boxplots'
+        os.mkdir(path)
         key_errors = []
         # print('Done by: ' + str(len(dict_of_targets)))
         for name, _ in tqdm(data.iteritems()):
             for index, _ in data.iterrows():
                 # if not np.isnan(data.at[index, name]):
                 if data.at[index, name] > 0:
-                    try:  # there is at least one key error in here. Not sure where it comes from
-                        frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += [data.at[index, name]]
+                    try:  # catching key errors
+                        frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
                         frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
                     except Exception:
                         error_msg = traceback.format_exc()
@@ -124,16 +128,25 @@ if tasks_to_perform[2]:
         # frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
         # frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
         for name, _ in tqdm(frame_a.iteritems()):
+            boxplot_data = []
+            labels = []
             for index, _ in frame_a.iterrows():
                 if len(frame_a.at[index, name]) > 1:
-                    #TODO: Put boxplots here
+                    # The title of the boxplot is the target representative, and each boxplot represents one
+                    # drug representative
+                    boxplot_data += frame_a.at[index, name]
+                    labels += [index]
                     frame_a.at[index, name] = sum(frame_a.at[index, name]) / frame_b.at[index, name]
                 else:
                     frame_a.at[index, name] = np.nan
+            plt.boxplot(boxplot_data, labels=labels)
+            plt.title(name)
+            plt.savefig(path+"/"+name)
+            plt.clf()
         return frame_a, key_errors
-
-    #TODO: Don't touch this one, it works
     '''
+
+    # TODO: Don't touch this one, it works
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         key_errors = []
         # print('Done by: ' + str(len(dict_of_targets)))
@@ -156,23 +169,17 @@ if tasks_to_perform[2]:
                 else:
                     frame_a.at[index, name] = np.nan
         return frame_a, key_errors
-    '''
+
 
     row_names, drug_dict = make_dict_mayachemtools(pd.read_csv(file['path'] +
                                                                output['intermediate_drug_representatives'], sep=','))
     col_names, target_dict = make_dict_cd_hit(pd.read_csv(file['path'] + output['target_representatives'], sep='\t'))
 
-
     # These two empty frames will be used to create the new averaged clean interaction frame.
-    df_a = pd.DataFrame([0.0], columns=col_names, index=row_names, dtype=float)
+    df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
 
-    # TODO: Leave these also alone
-    # These two empty frames will be used to create the new averaged clean interaction frame.
-    # df_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
-    # df_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
-
-    # RDKit has an issue with tautomeres. Even at 100% similarity you would expect all instances of teh same compound,
+    # RDKit has an issue with tautomeres. Even at 100% similarity you would expect all instances of the same compound,
     # to cluster, but in some tautomere cases they don't. In these cases pandas changes the datatype of rows with
     # repeating row_names to pd.core.series.Series
     # The worrisome part is, that we don't know if RDKit only fails at clustering tautomeres.
@@ -182,17 +189,23 @@ if tasks_to_perform[2]:
             compounds_appearing_more_than_once += [i]
     compounds_appearing_more_than_once = list(set(compounds_appearing_more_than_once))
 
+    intermediate_drugs = pd.read_csv(file['path']+file['intermediate_drug_representatives'], sep=',', header=0,
+                                     index_col=1)
     interaction_file = pd.read_csv(file['path']+file['interaction_file'], sep='\t', header=0, index_col=0)
 
     df_a = df_a.drop(compounds_appearing_more_than_once)
     df_b = df_b.drop(compounds_appearing_more_than_once)
+    intermediate_drugs = intermediate_drugs.drop(compounds_appearing_more_than_once)
     interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
 
+    # intermediate_interactions, key_Errors = update_interactions(file['path'], interaction_file, df_a, df_b, drug_dict,
+    #                                                            target_dict)
+    intermediate_drugs.to_csv(file['path']+output['intermediate_drug_representatives'], sep=',')
     intermediate_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
     intermediate_interactions.to_csv(file['path']+output['intermediate_interaction_file'], sep='\t')
 
     # Saving faulty indices to a separate file
-    if tasks_to_perform[2] and tasks_to_perform[3] and tasks_to_perform[4]:
+    if tasks_to_perform[2] and tasks_to_perform[4]:
         lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
         for tautomere in compounds_appearing_more_than_once:
             lines_to_write += [tautomere+'\n']
@@ -208,13 +221,15 @@ else:
     print('Skipping Drug Target Interaction Update')
 
 if tasks_to_perform[3]:
+    print('THIS STEP REMOVES A LOT OF DATA, SINCE ONLY DRUGS WITH A STR LEN OF 120 OR LESS ARE ALLOWED. '
+          'Removal of Drugs with characters that ChemVAE can\'t encode.')
     compound_file = pd.read_csv(file['path']+output['intermediate_drug_representatives'], sep=',')
     interaction_file = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='\t', index_col=0)
 
     error_compounds = []
     for i in range(compound_file.shape[0] - 1, 0, -1):
-        if (compound_file.iat[i, 0].find('.') != -1) or (compound_file.iat[i, 0].find('e') != -1) or \
-                (compound_file.iat[i, 0].find('i') != -1):
+        if ((compound_file.iat[i, 0].find('.') != -1) or (compound_file.iat[i, 0].find('e') != -1) or
+                (compound_file.iat[i, 0].find('i') != -1)) or len(compound_file.iat[i, 0]) > 120:
             compound_file = compound_file.drop(index=compound_file.index[i])
             try:
                 interaction_file = interaction_file.drop(index=compound_file.iat[i, 1])
@@ -230,7 +245,22 @@ if tasks_to_perform[3]:
     compound_file.to_csv(file['path']+output['drug_representatives'], sep=',', index=False)
     interaction_file.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
 
+# once all the preprocessing is done, the file with the drug cluster representatives can be created
+# this step only works with the mayachemtools output
+if tasks_to_perform[0]:
+    intermediate_drugs = pd.read_csv(file['path']+file['intermediate_drug_representatives'], sep=',', header=0,
+                                     index_col=1)
+    clustered_drugs = pd.DataFrame(columns=intermediate_drugs.columns)
+    i = 1
+    for index, _ in intermediate_drugs.iterrows():
+        if intermediate_drugs.iat[index, 2] == i:
+            clustered_drugs.append(intermediate_drugs.iloc[[index]])
+            i+=1
+    clustered_drugs.to_csv(file['path']+output['drug_cluster'], sep=',', index=False)
+
 else:
     print('Skipping the removal of Drugs with characters that ChemVAE can\'t encode.')
-    cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
-    cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
+    if tasks_to_perform[2]:
+        cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
+        cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
+
