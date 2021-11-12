@@ -251,11 +251,11 @@ if tasks_to_perform[0]:
     intermediate_drugs = pd.read_csv(file['path']+file['intermediate_drug_representatives'], sep=',', header=0,
                                      index_col=1)
     clustered_drugs = pd.DataFrame(columns=intermediate_drugs.columns)
-    i = 1
-    for index, _ in intermediate_drugs.iterrows():
-        if intermediate_drugs.iat[index, 2] == i:
-            clustered_drugs.append(intermediate_drugs.iloc[[index]])
-            i+=1
+    cluster_number = 1
+    for i in range(intermediate_drugs.shape[0]):
+        if intermediate_drugs.iat[i, 2] == cluster_number:
+            clustered_drugs = clustered_drugs.append(intermediate_drugs.iloc[[i]])
+            cluster_number += 1
     clustered_drugs.to_csv(file['path']+output['drug_cluster'], sep=',', index=False)
 
 else:
