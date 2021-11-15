@@ -1,4 +1,3 @@
-import os
 import traceback
 
 from process_inputs import parse_config
@@ -7,7 +6,8 @@ import pandas as pd
 import numpy as np
 import subprocess  # to run CD-Hit and mayachemtools
 
-import matplotlib.pyplot as plt  # for the boxplots
+# import os
+# import matplotlib.pyplot as plt  # for the boxplots
 
 tasks_to_perform, file, output, params = parse_config()
 
@@ -24,11 +24,9 @@ if tasks_to_perform[0]:
     # For this part you need mayachemtools which uses RDKit and you can find it here:
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
-    clustering_process = params['mayachemtools_path'] + \
-                         ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
-                         ' --butinaReordering=yes ' + \
-                         '-i ' + file['path'] + file['drug_file'] + \
-                         ' -o ' + file['path'] + output['intermediate_drug_representatives']
+    clustering_process = params['mayachemtools_path'] + ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
+        ' --butinaReordering=yes ' + '-i ' + file['path'] + file['drug_file'] + \
+        ' -o ' + file['path'] + output['intermediate_drug_representatives']
     subprocess.call(clustering_process, shell=True)
 
 else:
@@ -89,6 +87,7 @@ if tasks_to_perform[2]:
 
         return cols, out_dict
 
+
     def make_dict_mayachemtools(data):
         rows = []  # drugs are always the rows
         out_dict = {}
@@ -106,9 +105,11 @@ if tasks_to_perform[2]:
 
         return rows, out_dict
 
+
     # update interactions takes the clusteres and the dictionaries of the cluster ids and
     # averages the interaction values for each cluster by using its members
     # TODO: add box-plots outputs here
+
     '''
     def update_interactions(path, data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         path = path + '/boxplots'
@@ -189,9 +190,9 @@ if tasks_to_perform[2]:
             compounds_appearing_more_than_once += [i]
     compounds_appearing_more_than_once = list(set(compounds_appearing_more_than_once))
 
-    intermediate_drugs = pd.read_csv(file['path']+file['intermediate_drug_representatives'], sep=',', header=0,
+    intermediate_drugs = pd.read_csv(file['path'] + output['intermediate_drug_representatives'], sep=',', header=0,
                                      index_col=1)
-    interaction_file = pd.read_csv(file['path']+file['interaction_file'], sep='\t', header=0, index_col=0)
+    interaction_file = pd.read_csv(file['path'] + file['interaction_file'], sep='\t', header=0, index_col=0)
 
     df_a = df_a.drop(compounds_appearing_more_than_once)
     df_b = df_b.drop(compounds_appearing_more_than_once)
@@ -200,19 +201,19 @@ if tasks_to_perform[2]:
 
     # intermediate_interactions, key_Errors = update_interactions(file['path'], interaction_file, df_a, df_b, drug_dict,
     #                                                            target_dict)
-    intermediate_drugs.to_csv(file['path']+output['intermediate_drug_representatives'], sep=',')
+    intermediate_drugs.to_csv(file['path'] + output['intermediate_drug_representatives'], sep=',')
     intermediate_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
-    intermediate_interactions.to_csv(file['path']+output['intermediate_interaction_file'], sep='\t')
+    intermediate_interactions.to_csv(file['path'] + output['intermediate_interaction_file'], sep='\t')
 
     # Saving faulty indices to a separate file
     if tasks_to_perform[2] and tasks_to_perform[4]:
         lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
         for tautomere in compounds_appearing_more_than_once:
-            lines_to_write += [tautomere+'\n']
+            lines_to_write += [tautomere + '\n']
         lines_to_write += ["\nDrug and Target ids that are not in any cluster:\n"]
         key_Errors = list(set(key_Errors))
         for key_Error in key_Errors:
-            lines_to_write += [key_Error+'\n']
+            lines_to_write += [key_Error + '\n']
         key_error_file = open(file['path'] + output['key_errors'], 'w')
         key_error_file.writelines(lines_to_write)
         key_error_file.close()
@@ -223,44 +224,50 @@ else:
 if tasks_to_perform[3]:
     print('THIS STEP REMOVES A LOT OF DATA, SINCE ONLY DRUGS WITH A STR LEN OF 120 OR LESS ARE ALLOWED. '
           'Removal of Drugs with characters that ChemVAE can\'t encode.')
-    compound_file = pd.read_csv(file['path']+output['intermediate_drug_representatives'], sep=',')
-    interaction_file = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='\t', index_col=0)
+    compound_file = pd.read_csv(file['path'] + output['intermediate_drug_representatives'], sep=',')
+    interaction_file = pd.read_csv(file['path'] + output['intermediate_interaction_file'], sep='\t', index_col=0)
+
+    print(compound_file.head())
 
     error_compounds = []
+    count_long_ones = 0
     for i in range(compound_file.shape[0] - 1, 0, -1):
-        if ((compound_file.iat[i, 0].find('.') != -1) or (compound_file.iat[i, 0].find('e') != -1) or
-                (compound_file.iat[i, 0].find('i') != -1)) or len(compound_file.iat[i, 0]) > 120:
+        if ((compound_file.iat[i, 1].find('.') != -1) or (compound_file.iat[i, 1].find('e') != -1) or
+            (compound_file.iat[i, 1].find('i') != -1)) or len(compound_file.iat[i, 1]) > 120:
+            if len(compound_file.iat[i, 1]) > 120:
+                count_long_ones += 1
+                print(count_long_ones)
             compound_file = compound_file.drop(index=compound_file.index[i])
             try:
-                interaction_file = interaction_file.drop(index=compound_file.iat[i, 1])
+                interaction_file = interaction_file.drop(index=compound_file.iat[i, 0])
             except:
-                if compound_file.iat[i, 1] not in error_compounds:
-                    error_compounds += [compound_file.iat[i, 1]]
+                if compound_file.iat[i, 0] not in error_compounds:
+                    error_compounds += [compound_file.iat[i, 0]]
 
     compound_error_file = open(file['path'] + "/chemVAE_bad_compounds.txt", 'w')
     for bad_compound in error_compounds:
-        compound_error_file.write(bad_compound+'\n')
+        compound_error_file.write(bad_compound + '\n')
     compound_error_file.close()
 
-    compound_file.to_csv(file['path']+output['drug_representatives'], sep=',', index=False)
-    interaction_file.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
+    compound_file.to_csv(file['path'] + output['drug_representatives'], sep=',', index=False)
+    interaction_file.to_csv(file['path'] + output['cleaned_interaction_file'], sep='\t')
+
 
 # once all the preprocessing is done, the file with the drug cluster representatives can be created
 # this step only works with the mayachemtools output
-if tasks_to_perform[0]:
-    intermediate_drugs = pd.read_csv(file['path']+file['intermediate_drug_representatives'], sep=',', header=0,
+if tasks_to_perform[0]: # TODO: This has to be moved
+    intermediate_drugs = pd.read_csv(file['path'] + output['intermediate_drug_representatives'], sep=',', header=0,
                                      index_col=1)
     clustered_drugs = pd.DataFrame(columns=intermediate_drugs.columns)
     cluster_number = 1
     for i in range(intermediate_drugs.shape[0]):
-        if intermediate_drugs.iat[i, 2] == cluster_number:
+        if intermediate_drugs.iat[i, 1] == cluster_number:
             clustered_drugs = clustered_drugs.append(intermediate_drugs.iloc[[i]])
             cluster_number += 1
-    clustered_drugs.to_csv(file['path']+output['drug_cluster'], sep=',', index=False)
+    clustered_drugs.to_csv(file['path'] + output['drug_cluster'], sep=',', index=False)
 
 else:
     print('Skipping the removal of Drugs with characters that ChemVAE can\'t encode.')
     if tasks_to_perform[2]:
-        cleaned_interactions = pd.read_csv(file['path']+output['intermediate_interaction_file'], sep='t')
-        cleaned_interactions.to_csv(file['path']+output['cleaned_interaction_file'], sep='\t')
-
+        cleaned_interactions = pd.read_csv(file['path'] + output['intermediate_interaction_file'], sep='\t')
+        cleaned_interactions.to_csv(file['path'] + output['cleaned_interaction_file'], sep='\t')
