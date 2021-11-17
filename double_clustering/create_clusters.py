@@ -14,6 +14,7 @@ tasks_to_perform, file, output, params = parse_config()
 '''
 raw input_to_raw_DTI_ready and create_cluster are separate scripts, because I am currently using separate
 environments for both for now
+this is changing now with the main script
 '''
 
 # Part 1 create drug cluster

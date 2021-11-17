@@ -2,12 +2,10 @@
 # import ast  # to go from string to list while parsing col-names
 # import math  # to calculate better chunk sizes
 
-
 # import traceback
 from process_inputs import parse_config
 from src.functions import *
 # import numpy as np
-# import subprocess  # to run CD-Hit and mayachemtools
 
 # from tqdm import tqdm  # shows progress of for loops
 
@@ -29,9 +27,6 @@ The name of the output file
 Whatever else comes to mind
 '''
 
-# PART 1
-
-# Loading the data
 tasks_to_perform, files, file_specifications, output, params = parse_config()
 
 if not os.path.isdir(files['path']):
@@ -46,3 +41,14 @@ else:
     print("Part 1: Skipping raw transformation, and the creating of drug, target, and interaction files.")
 
 # PART 2 Clustering
+if tasks_to_perform[1]:
+    print("Part 2: Creating Drug Clusters.")
+    cluster_drugs(files, output, params)
+else:
+    print("Part 2: Skipping Drug Clusters.")
+
+if tasks_to_perform[2]:
+    print("Part 2: Creating Target Clusters.")
+    cluster_targets(files, output, params)
+else:
+    print("Part 2: Skipping Target Clusters.")
