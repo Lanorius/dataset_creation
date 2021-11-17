@@ -1,18 +1,17 @@
 import pandas as pd
-import ast   # to go from string to list while parsing col-names
+import ast  # to go from string to list while parsing col-names
 import math  # to calculate better chunk sizes
 import os  # to remove intermediate files
 
 import traceback
 from process_inputs import parse_config
-
+from src.functions import *
 import numpy as np
 import subprocess  # to run CD-Hit and mayachemtools
 
 from tqdm import tqdm  # shows progress of for loops
-# import matplotlib.pyplot as plt  # for the boxplots
 
-tasks_to_perform, file, output, params = parse_config()
+# import matplotlib.pyplot as plt  # for the boxplots
 
 
 # TODO: What is the input?
@@ -33,18 +32,23 @@ Whatever else comes to mind
 # PART 1
 
 # Loading the data
-raw_transformation, files, output, file_specifications = parse_config()
+tasks_to_perform, files, file_specifications, output, params = parse_config()
+
+if not os.path.isdir(files['path']):
+    os.mkdir(files['path'])
+
 # files is writen as plural, however for now it only works with a single file
 # params will very likely be moved to another file
 
-cleaned_file = output['cleaned_frame']
+raw_transformer(files, file_specifications, output)
 
-if raw_transformation:
+'''
+if tasks_to_perform[0]:
     print("Part 1: Performing raw transformation.")
 else:
     print("Part 1: Skipping raw transformation.")
 
-if raw_transformation:
+if tasks_to_perform[0]:
     path = files['bindingDB_file']
     sep = file_specifications['separator_one']
     cols = [file_specifications['protein_IDs'], file_specifications['ligand_IDs'],
@@ -54,7 +58,7 @@ if raw_transformation:
 
     cleaned_frame = pd.DataFrame(columns=cols)
 
-    chunksize = math.ceil(len(list(open(path)))/5)  # allows handeling large sets of input data
+    chunksize = math.ceil(len(list(open(path))) / 5)  # allows handeling large sets of input data
     for chunk in pd.read_csv(filepath_or_buffer=path, sep=sep, chunksize=chunksize, usecols=cols, on_bad_lines='skip',
                              engine='python'):
         # chunk = chunk[chunk['Target Source Organism According to Curator or DataSource'] == "Homo sapiens"]
@@ -67,13 +71,13 @@ if raw_transformation:
         cleaned_frame = pd.concat([cleaned_frame, chunk])
     # this needs to be adjusted to the config file
     cleaned_frame.to_csv(cleaned_file, sep='\t')
-
+'''
 # PART 2
 # move the other file here
 
 print("Part 2: Creating necessary files.")
 
-path = cleaned_file
+path = output['cleaned_frame']
 sep = '\t'  # should come from config
 
 f = open(output['fasta_file'], 'w')
@@ -83,7 +87,7 @@ file = pd.read_csv(filepath_or_buffer=path, sep=sep, engine='python')
 
 for index, row in file.iterrows():
 
-    f.write(">"+row[file_specifications['protein_IDs']]+"\n")
+    f.write(">" + row[file_specifications['protein_IDs']] + "\n")
     i = 0
     while i < len(row[file_specifications['protein_sequence']]):
         if i % 40 != 39:
@@ -96,7 +100,7 @@ for index, row in file.iterrows():
     if i % 40 != 0:
         f.write("\n")
 
-    d.write(row[file_specifications['ligand_SMILE']]+" "+row[file_specifications['ligand_IDs']]+"\n")
+    d.write(row[file_specifications['ligand_SMILE']] + " " + row[file_specifications['ligand_IDs']] + "\n")
 
 # ensures the output is a csv file
 # all duplicate lines are removed here from the drugs as well
