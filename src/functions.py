@@ -2,6 +2,9 @@ import pandas as pd
 import math  # to calculate better chunk sizes
 import os  # to remove intermediate files
 import subprocess  # to run CD-Hit and mayachemtools
+from tqdm import tqdm  # shows progress of a few loops
+import traceback  # needed in update_interactions
+import numpy as np
 
 
 def raw_transformer(files, file_specifications, output):
@@ -109,3 +112,93 @@ def cluster_targets(files, output, params):
     temp_target_reps.to_csv(files['path'] + output['target_representatives'], sep='\t', index=False)
 
     return 0
+
+
+def make_dict_cd_hit(data):
+    cols = []  # targets are always the columns
+    out_dict = {}
+    clusterrep = "No Target"
+    for item in tqdm(range(data.shape[0])):
+        if data.iat[item, 4] == 1:
+            clusterrep = data.iat[item, 0]
+            cols += [clusterrep]
+            out_dict.update({clusterrep: clusterrep})
+        else:
+            out_dict.update({data.iat[item, 0]: clusterrep})
+
+    return cols, out_dict
+
+
+def make_dict_mayachemtools(data):
+    rows = []  # drugs are always the rows
+    out_dict = {}
+    last_cluster = data.iat[0, 2]  # first cluster id
+    clusterrep = data.iat[0, 1]  # by mayechemtools logic the cluster center comes first
+    for item in tqdm(range(data.shape[0])):
+        current_cluster = data.iat[item, 2]
+        if last_cluster == current_cluster:
+            out_dict.update({data.iat[item, 1]: clusterrep})
+        else:
+            clusterrep = data.iat[item, 1]
+            rows += [clusterrep]
+            last_cluster = current_cluster
+            out_dict.update({clusterrep: clusterrep})
+
+    return rows, out_dict
+
+
+def update_interactions(data, col_names, row_names, dict_of_drugs, dict_of_targets):
+    frame_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
+    frame_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
+    key_errors = []
+    box_plot_dict = {}  # to create some visualizations of the data
+    # print('Done by: ' + str(len(dict_of_targets)))
+    for name, _ in tqdm(data.iteritems()):
+        for index, _ in data.iterrows():
+            if data.at[index, name] > 0:
+                try:
+                    frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
+                    frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
+                    box_key = str(index)+'_'+str(name)
+                    if box_key in box_plot_dict:
+                        box_plot_dict[box_key] += [data.at[index, name]]
+                    else:
+                        box_plot_dict[box_key] = [data.at[index, name]]
+                except Exception:
+                    error_msg = traceback.format_exc()
+                    key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
+    # frame_a.to_csv('intermediate_files/frame_a.csv', sep='\t')
+    # frame_b.to_csv('intermediate_files/frame_b.csv', sep='\t')
+    for name, _ in tqdm(frame_a.iteritems()):
+        for index, _ in frame_a.iterrows():
+            if frame_a.at[index, name] != 0:
+                frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
+            else:
+                frame_a.at[index, name] = np.nan
+    return frame_a, key_errors, box_plot_dict
+
+
+'''
+    compounds_appearing_more_than_once = []
+    for i, _ in df_a.iterrows():
+        if type(df_a.at[i, df_a.columns[0]]) == pd.core.series.Series:
+            compounds_appearing_more_than_once += [i]
+    compounds_appearing_more_than_once = list(set(compounds_appearing_more_than_once))
+
+    intermediate_drugs = pd.read_csv(file['path'] + output['intermediate_drug_representatives'], sep=',', header=0,
+                                     index_col=1)
+    interaction_file = pd.read_csv(file['path'] + file['interaction_file'], sep='\t', header=0, index_col=0)
+
+    df_a = df_a.drop(compounds_appearing_more_than_once)
+    df_b = df_b.drop(compounds_appearing_more_than_once)
+    intermediate_drugs = intermediate_drugs.drop(compounds_appearing_more_than_once)
+    interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
+
+    # intermediate_interactions, key_Errors = update_interactions(file['path'], interaction_file, df_a, df_b, drug_dict,
+    #                                                            target_dict)
+    intermediate_drugs.to_csv(file['path'] + output['intermediate_drug_representatives'], sep=',')
+    intermediate_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
+    intermediate_interactions.to_csv(file['path'] + output['intermediate_interaction_file'], sep='\t')
+    
+    
+'''

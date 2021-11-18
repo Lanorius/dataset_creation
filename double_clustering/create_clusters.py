@@ -206,6 +206,9 @@ if tasks_to_perform[2]:
     intermediate_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
     intermediate_interactions.to_csv(file['path'] + output['intermediate_interaction_file'], sep='\t')
 
+
+
+
     # Saving faulty indices to a separate file
     if tasks_to_perform[2] and tasks_to_perform[4]:
         lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
@@ -254,9 +257,13 @@ if tasks_to_perform[3]:
     interaction_file.to_csv(file['path'] + output['cleaned_interaction_file'], sep='\t')
 
 
+
+
+
+
 # once all the preprocessing is done, the file with the drug cluster representatives can be created
 # this step only works with the mayachemtools output
-if tasks_to_perform[0]: # TODO: This has to be moved
+if tasks_to_perform[0]:  # TODO: This has to be moved
     intermediate_drugs = pd.read_csv(file['path'] + output['intermediate_drug_representatives'], sep=',', header=0,
                                      index_col=1)
     clustered_drugs = pd.DataFrame(columns=intermediate_drugs.columns)

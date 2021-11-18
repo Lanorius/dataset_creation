@@ -5,6 +5,8 @@
 # import traceback
 from process_inputs import parse_config
 from src.functions import *
+from ast import literal_eval
+
 # import numpy as np
 
 # from tqdm import tqdm  # shows progress of for loops
@@ -12,7 +14,7 @@ from src.functions import *
 # import matplotlib.pyplot as plt  # for the boxplots
 
 
-# TODO: What is the input?
+# TODO: What is the input? Format it the way Kyra did
 '''
 One idea would be to expect the user to do a very basic level of preprocessing
 This document will be much more powerful if we can expect the input to be the following:
@@ -27,7 +29,7 @@ The name of the output file
 Whatever else comes to mind
 '''
 
-tasks_to_perform, files, file_specifications, output, params = parse_config()
+tasks_to_perform, sub_tasks_to_perform, files, file_specifications, output, params = parse_config()
 
 if not os.path.isdir(files['path']):
     os.mkdir(files['path'])
@@ -48,7 +50,21 @@ else:
     print("Part 2: Skipping Drug Clusters.")
 
 if tasks_to_perform[2]:
-    print("Part 2: Creating Target Clusters.")
+    print("Part 2.1: Creating Target Clusters.")
     cluster_targets(files, output, params)
 else:
-    print("Part 2: Skipping Target Clusters.")
+    print("Part 2.2: Skipping Target Clusters.")
+
+if tasks_to_perform[3]:
+    print("Part 3: Preparing the files for DTI.")
+
+    row_names, drug_dict = make_dict_mayachemtools(pd.read_csv(files['path'] +
+                                                               output['intermediate_drug_representatives'], sep=','))
+    col_names, target_dict = make_dict_cd_hit(pd.read_csv(files['path'] + output['target_representatives'], sep='\t'))
+
+
+else:
+    print("Part 3: Skipping the preparation of the files for DTI.")
+
+print(literal_eval(params['bad_characters']))
+
