@@ -64,12 +64,11 @@ if tasks_to_perform[3]:
 
     key_error_file = open(files['path'] + output['key_errors'], 'w')
 
-    a, b, ea, eb = drop_unwanted_troublemakers(col_names, row_names, files, output, params)
+    a, b, ea = drop_unwanted_troublemakers(col_names, row_names, files, output, params)
 
     print(a.shape)
     print(b.shape)
     print(len(ea))
-    print(len(eb))
 
 else:
     print("Part 3: Skipping the preparation of the files for DTI.")

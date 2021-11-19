@@ -174,35 +174,41 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
 
     # Second, removing compounds that are either too long, or have unwanted characters. This step is optional.
-    error_compounds = []
     # Removing compounds that are too long.
     if len(params['drug_length']) > 0:
-        for i in range(intermediate_drugs.shape[0] - 1, 0, -1):
-            print(intermediate_drugs.head())  # TODO: HERE
-            if len(intermediate_drugs.iat[i, 1]) > int(params['drug_length']):
+        for i in tqdm(range(intermediate_drugs.shape[0] - 1, -1, -1)):
+            if len(intermediate_drugs.iat[i, 0]) > int(params['drug_length']):
+                interaction_file = interaction_file.drop(index=intermediate_drugs.index[i])
                 intermediate_drugs = intermediate_drugs.drop(index=intermediate_drugs.index[i])
-            try:
-                interaction_file = interaction_file.drop(index=intermediate_drugs.iat[i, 0])
-            except:
-                if intermediate_drugs.iat[i, 0] not in error_compounds:
-                    error_compounds += [intermediate_drugs.iat[i, 0]]
 
     # Removing compounds that have a character that can't be processed
     if len(literal_eval(params['bad_characters'])) > 0:
-        for i in range(intermediate_drugs.shape[0] - 1, 0, -1):
+        for i in tqdm(range(intermediate_drugs.shape[0] - 1, -1, -1)):
             if len([char for char in literal_eval(params['bad_characters'])
-                    if (char in intermediate_drugs.iat[i, 1])]) > 0:
+                    if (char in intermediate_drugs.iat[i, 0])]) > 0:
+                interaction_file = interaction_file.drop(index=intermediate_drugs.index[i])
                 intermediate_drugs = intermediate_drugs.drop(index=intermediate_drugs.index[i])
-            try:
-                interaction_file = interaction_file.drop(index=intermediate_drugs.iat[i, 0])
-            except:
-                if intermediate_drugs.iat[i, 0] not in error_compounds:
-                    error_compounds += [intermediate_drugs.iat[i, 0]]
+
+    # TODO: The code works fine even though there are some compounds getting lost on the way, check if you have time.
+    '''
+    print(list(set(interaction_file.index)-set(intermediate_drugs.index)))
+    print(list(set(intermediate_drugs.index)-set(interaction_file.index)))
+
+    print(len(list(set(interaction_file.index))))
+    print(len(list(set(intermediate_drugs.index))))
+
+    # Compounds which should be in the drug_file but got lost
+    lost_compounds = list(set(interaction_file.index)-set(intermediate_drugs.index))
+    interaction_file = interaction_file.drop(lost_compounds)
+
+    compounds_lost = list(set(intermediate_drugs.index)-set(interaction_file.index))
+    intermediate_drugs = intermediate_drugs.drop(compounds_lost)
+    '''
 
     intermediate_drugs.to_csv(files['path'] + output['intermediate_drug_representatives'], sep='\t')
     interaction_file.to_csv(files['path'] + output['intermediate_interaction_file'], sep='\t')
 
-    return frame_a, frame_b, compounds_appearing_more_than_once, error_compounds
+    return frame_a, frame_b, compounds_appearing_more_than_once
 
 
 '''
