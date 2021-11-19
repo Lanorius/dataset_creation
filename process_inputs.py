@@ -9,9 +9,7 @@ def parse_config():
                         config["PERFORM STEPS"].getboolean('create_target_cluster'),
                         config["PERFORM STEPS"].getboolean('update_drug_target_interactions')]
 
-    sub_tasks_to_perform = [config["PERFORM SUB-STEPS"].getboolean('transform_Kd_to_pKd'),
-                            config["PERFORM SUB-STEPS"].getboolean('prepare_data_for_chemVAE'),
-                            config["PERFORM SUB-STEPS"].getboolean('save_key_errors')]
+    sub_tasks_to_perform = [config["PERFORM SUB-STEPS"].getboolean('transform_Kd_to_pKd')]
 
     files = config["INPUT FILES"]
     file_specifications = config['FILE SPECIFICATIONS']

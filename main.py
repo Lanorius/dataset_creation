@@ -5,7 +5,7 @@
 # import traceback
 from process_inputs import parse_config
 from src.functions import *
-from ast import literal_eval
+# from ast import literal_eval
 
 # import numpy as np
 
@@ -59,12 +59,20 @@ if tasks_to_perform[3]:
     print("Part 3: Preparing the files for DTI.")
 
     row_names, drug_dict = make_dict_mayachemtools(pd.read_csv(files['path'] +
-                                                               output['intermediate_drug_representatives'], sep=','))
+                                                               output['clustered_drugs'], sep=','))
     col_names, target_dict = make_dict_cd_hit(pd.read_csv(files['path'] + output['target_representatives'], sep='\t'))
 
+    key_error_file = open(files['path'] + output['key_errors'], 'w')
+
+    a, b, ea, eb = drop_unwanted_troublemakers(col_names, row_names, files, output, params)
+
+    print(a.shape)
+    print(b.shape)
+    print(len(ea))
+    print(len(eb))
 
 else:
     print("Part 3: Skipping the preparation of the files for DTI.")
 
-print(literal_eval(params['bad_characters']))
-
+# print(len(literal_eval(params['bad_characters'])))
+# print(type(params['drug_length']))

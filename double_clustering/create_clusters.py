@@ -109,46 +109,6 @@ if tasks_to_perform[2]:
 
     # update interactions takes the clusteres and the dictionaries of the cluster ids and
     # averages the interaction values for each cluster by using its members
-    # TODO: add box-plots outputs here
-
-    '''
-    def update_interactions(path, data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
-        path = path + '/boxplots'
-        os.mkdir(path)
-        key_errors = []
-        # print('Done by: ' + str(len(dict_of_targets)))
-        for name, _ in tqdm(data.iteritems()):
-            for index, _ in data.iterrows():
-                # if not np.isnan(data.at[index, name]):
-                if data.at[index, name] > 0:
-                    try:  # catching key errors
-                        frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
-                        frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
-                    except Exception:
-                        error_msg = traceback.format_exc()
-                        key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
-        # frame_a.to_csv('../intermediate_files/frame_a.csv', sep='\t')
-        # frame_b.to_csv('../intermediate_files/frame_b.csv', sep='\t')
-        for name, _ in tqdm(frame_a.iteritems()):
-            boxplot_data = []
-            labels = []
-            for index, _ in frame_a.iterrows():
-                if len(frame_a.at[index, name]) > 1:
-                    # The title of the boxplot is the target representative, and each boxplot represents one
-                    # drug representative
-                    boxplot_data += frame_a.at[index, name]
-                    labels += [index]
-                    frame_a.at[index, name] = sum(frame_a.at[index, name]) / frame_b.at[index, name]
-                else:
-                    frame_a.at[index, name] = np.nan
-            plt.boxplot(boxplot_data, labels=labels)
-            plt.title(name)
-            plt.savefig(path+"/"+name)
-            plt.clf()
-        return frame_a, key_errors
-    '''
-
-    # TODO: Don't touch this one, it works
     def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets):
         key_errors = []
         # print('Done by: ' + str(len(dict_of_targets)))
@@ -206,9 +166,6 @@ if tasks_to_perform[2]:
     intermediate_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
     intermediate_interactions.to_csv(file['path'] + output['intermediate_interaction_file'], sep='\t')
 
-
-
-
     # Saving faulty indices to a separate file
     if tasks_to_perform[2] and tasks_to_perform[4]:
         lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
@@ -257,10 +214,6 @@ if tasks_to_perform[3]:
     interaction_file.to_csv(file['path'] + output['cleaned_interaction_file'], sep='\t')
 
 
-
-
-
-
 # once all the preprocessing is done, the file with the drug cluster representatives can be created
 # this step only works with the mayachemtools output
 if tasks_to_perform[0]:  # TODO: This has to be moved
@@ -272,7 +225,7 @@ if tasks_to_perform[0]:  # TODO: This has to be moved
         if intermediate_drugs.iat[i, 1] == cluster_number:
             clustered_drugs = clustered_drugs.append(intermediate_drugs.iloc[[i]])
             cluster_number += 1
-    clustered_drugs.to_csv(file['path'] + output['drug_cluster'], sep=',', index=False)
+    clustered_drugs.to_csv(file['path'] + output['intermediate_drug_representatives'], sep=',', index=False)
 
 else:
     print('Skipping the removal of Drugs with characters that ChemVAE can\'t encode.')

@@ -3,3 +3,4 @@ numpy~=1.21.2
 tqdm~=4.62.2
 rdkit~=2021.03.5
 matplotlib~=3.4.3
+silx
