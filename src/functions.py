@@ -149,11 +149,6 @@ def make_dict_mayachemtools(data):
     return rows, out_dict
 
 
-def kd_to_pkd(data):
-    data = pd.read_csv(data, sep='\t', header=0, index_col=0).apply(lambda x: -np.log10(x / 1e9))
-    return data
-
-
 def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     frame_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     frame_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
@@ -189,7 +184,7 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
                 interaction_file = interaction_file.drop(index=intermediate_drugs.index[i])
                 intermediate_drugs = intermediate_drugs.drop(index=intermediate_drugs.index[i])
 
-    # TODO: The code works fine even though there are some compounds getting lost on the way, check if you have time.
+    # TODO: Works, but a small amount of compounds (11 for Kd_d08_t08) are getting lost, check if you have time.
     '''
     print(list(set(interaction_file.index)-set(intermediate_drugs.index)))
     print(list(set(intermediate_drugs.index)-set(interaction_file.index)))
@@ -211,30 +206,22 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     return frame_a, frame_b, compounds_appearing_more_than_once
 
 
-'''
-    compounds_appearing_more_than_once = []
-    for i, _ in df_a.iterrows():
-        if type(df_a.at[i, df_a.columns[0]]) == pd.core.series.Series:
-            compounds_appearing_more_than_once += [i]
-    compounds_appearing_more_than_once = list(set(compounds_appearing_more_than_once))
-
-    intermediate_drugs = pd.read_csv(files['path'] + output['intermediate_drug_representatives'], sep=',', header=0,
-                                     index_col=1)
-    interaction_file = pd.read_csv(files['path'] + file['interaction_file'], sep='\t', header=0, index_col=0)
-
-    df_a = df_a.drop(compounds_appearing_more_than_once)
-    df_b = df_b.drop(compounds_appearing_more_than_once)
-    intermediate_drugs = intermediate_drugs.drop(compounds_appearing_more_than_once)
-    interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
-'''
+def kd_to_pkd(data):
+    data = pd.read_csv(data, sep='\t', header=0, index_col=0).apply(lambda x: -np.log10(x / 1e9))
+    return data
 
 
-def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output):
+def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output, kd_pkd=False):
+    if kd_pkd:
+        data = kd_to_pkd(data)
+
     key_errors = []
     box_plot_dict = {}  # to create some visualizations of the data
-    print('Done by: ' + str(data.shape[1]))
+    print('Updating Interactions Part 1/2. Done by: ' + str(data.shape[1]))
     for name, _ in tqdm(data.iteritems()):
         for index, _ in data.iterrows():
+            # print(data.at[index, name])
+            # print(type(data.at[index, name]))
             if data.at[index, name] > 0:
                 try:
                     frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
@@ -244,10 +231,10 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                         box_plot_dict[box_key] += [data.at[index, name]]
                     else:
                         box_plot_dict[box_key] = [data.at[index, name]]
-                except Exception:
+                except (Exception, ):  # TODO: Is the warning gone?
                     error_msg = traceback.format_exc()
                     key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
-    print('Done by: ' + str(frame_a.shape[0]))
+    print('Updating Interactions Part 2/2. Done by: ' + str(frame_a.shape[1]))
     for name, _ in tqdm(frame_a.iteritems()):
         for index, _ in frame_a.iterrows():
             if frame_a.at[index, name] != 0:
@@ -256,8 +243,9 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                 frame_a.at[index, name] = np.nan
     dicttoh5(box_plot_dict, h5file=output['box_plot_dict'], h5path=files['path'], mode='w', overwrite_data=None,
              create_dataset_args=None, update_mode=None)
-    # TODO: Save key_errors to file
-    return frame_a
+
+    frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep='\t')
+    return key_errors
 
 
 '''
@@ -267,3 +255,16 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
     intermediate_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
     intermediate_interactions.to_csv(file['path'] + output['intermediate_interaction_file'], sep='\t')
 '''
+
+
+def save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output):
+    lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
+    for tautomere in compounds_appearing_more_than_once:
+        lines_to_write += [tautomere + '\n']
+    lines_to_write += ["\nDrug and Target ids that are not in any cluster:\n"]
+    key_errors = list(set(key_errors))
+    for key_error in key_errors:
+        lines_to_write += [key_error + '\n']
+    key_error_file = open(files['path'] + output['key_errors'], 'w')
+    key_error_file.writelines(lines_to_write)
+    key_error_file.close()

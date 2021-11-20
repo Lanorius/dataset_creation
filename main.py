@@ -64,14 +64,15 @@ if tasks_to_perform[3]:
 
     key_error_file = open(files['path'] + output['key_errors'], 'w')
 
-    a, b, ea = drop_unwanted_troublemakers(col_names, row_names, files, output, params)
+    frame_a, frame_b, compounds_appearing_more_than_once = drop_unwanted_troublemakers(col_names, row_names, files,
+                                                                                       output, params)
 
-    print(a.shape)
-    print(b.shape)
-    print(len(ea))
+    data = pd.read_csv(files['path']+output['intermediate_interaction_file'], sep='\t', header=0, index_col=0)
+    key_errors = update_interactions(data, frame_a, frame_b, drug_dict, target_dict, files, output,
+                                     kd_pkd=sub_tasks_to_perform[0])
+
+    save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output)
+
 
 else:
     print("Part 3: Skipping the preparation of the files for DTI.")
-
-# print(len(literal_eval(params['bad_characters'])))
-# print(type(params['drug_length']))
