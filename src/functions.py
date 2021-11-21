@@ -201,6 +201,7 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     '''
 
     intermediate_drugs.to_csv(files['path'] + output['intermediate_drug_representatives'], sep='\t')
+    # TODO: You need to create a proper clustered drugs output file
     interaction_file.to_csv(files['path'] + output['intermediate_interaction_file'], sep='\t')
 
     return frame_a, frame_b, compounds_appearing_more_than_once
@@ -236,8 +237,8 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                 frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
             else:
                 frame_a.at[index, name] = np.nan
-    dicttoh5(box_plot_dict, h5file=files['path']+output['box_plot_dict'], h5path=files['path'], mode='w', overwrite_data=None,
-             create_dataset_args=None, update_mode=None)
+    dicttoh5(box_plot_dict, h5file=files['path']+output['box_plot_dict'], h5path=files['path'], mode='w',
+             overwrite_data=None, create_dataset_args=None, update_mode=None)
 
     frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep='\t')
     return key_errors
