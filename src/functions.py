@@ -206,14 +206,9 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     return frame_a, frame_b, compounds_appearing_more_than_once
 
 
-def kd_to_pkd(data):
-    data = pd.read_csv(data, sep='\t', header=0, index_col=0).apply(lambda x: -np.log10(x / 1e9))
-    return data
-
-
 def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output, kd_pkd=False):
     if kd_pkd:
-        data = kd_to_pkd(data)
+        data = data.apply(lambda x: -np.log10(x / 1e9))
 
     key_errors = []
     box_plot_dict = {}  # to create some visualizations of the data
@@ -241,7 +236,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                 frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
             else:
                 frame_a.at[index, name] = np.nan
-    dicttoh5(box_plot_dict, h5file=output['box_plot_dict'], h5path=files['path'], mode='w', overwrite_data=None,
+    dicttoh5(box_plot_dict, h5file=files['path']+output['box_plot_dict'], h5path=files['path'], mode='w', overwrite_data=None,
              create_dataset_args=None, update_mode=None)
 
     frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep='\t')

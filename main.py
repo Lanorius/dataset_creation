@@ -73,6 +73,5 @@ if tasks_to_perform[3]:
 
     save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output)
 
-
 else:
     print("Part 3: Skipping the preparation of the files for DTI.")
