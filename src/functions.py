@@ -227,7 +227,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                         box_plot_dict[box_key] += [data.at[index, name]]
                     else:
                         box_plot_dict[box_key] = [data.at[index, name]]
-                except (Exception, ):  # TODO: Is the warning gone?
+                except (Exception, ):  # Probably not 100% elegant
                     error_msg = traceback.format_exc()
                     key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
     print('Updating Interactions Part 2/2. Done by: ' + str(frame_a.shape[1]))
@@ -242,15 +242,6 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
 
     frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep='\t')
     return key_errors
-
-
-'''
-    # intermediate_interactions, key_Errors = update_interactions(file['path'], interaction_file, df_a, df_b, drug_dict,
-    #                                                            target_dict)
-    intermediate_drugs.to_csv(file['path'] + output['intermediate_drug_representatives'], sep=',')
-    intermediate_interactions, key_Errors = update_interactions(interaction_file, df_a, df_b, drug_dict, target_dict)
-    intermediate_interactions.to_csv(file['path'] + output['intermediate_interaction_file'], sep='\t')
-'''
 
 
 def save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output):
