@@ -8,8 +8,20 @@ import numpy as np
 from silx.io.dictdump import dicttoh5  # to save h5 files
 from ast import literal_eval
 
+"""
+:param embeddings: path to reduced embedding file in h5 format
+:type embeddings: str
+"""
+
 
 def raw_transformer(files, file_specifications, output):
+    """
+    :param files: input files and path parsed from the config
+    :param file_specifications: information about the columns of the input, parsed from the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :return: no value is returned, but a clean_frame file is created which hold only the information of interest
+    """
+
     # takes a data_set, like the one from BindingDB and does a basic cleanup to it
     cols = [file_specifications['protein_IDs'], file_specifications['ligand_IDs'],
             file_specifications['protein_sequence'], file_specifications['ligand_SMILE'],
@@ -34,6 +46,12 @@ def raw_transformer(files, file_specifications, output):
 
 
 def create_raw_files(files, file_specifications, output):
+    """
+    :param files: input files and path parsed from the config
+    :param file_specifications: information about the columns of the input, parsed from the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :return: no value is returned, creates the drug, target and interaction files
+    """
     f = open(files['path'] + output['target_file'], 'w')
     d = open('temp_drugs.txt', 'w')
     file = pd.read_csv(filepath_or_buffer=(files['path'] + output['cleaned_frame']), sep='\t', engine='python')
@@ -73,6 +91,12 @@ def create_raw_files(files, file_specifications, output):
 
 
 def cluster_drugs(files, output, params):
+    """
+    :param files: for the file path as specified in the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :param params: location of the mayachemtools folder and drug similarity parameter
+    :return: no value is returned, creates the clustered drugs file
+    """
     # RDKit offers the tools necessary to cluster SMILES.
     # For this part you need mayachemtools which uses RDKit and you can find it here:
     # http://www.mayachemtools.org/docs/scripts/html/index.html
@@ -87,6 +111,12 @@ def cluster_drugs(files, output, params):
 
 
 def cluster_targets(files, output, params):
+    """
+    :param files: for the file path as specified in the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :param params: target similarity parameter
+    :return: no value is returned, creates the clustered target file
+    """
     # running CD-hit
 
     seq_sim = float(params['sequence_similarity'])
@@ -116,22 +146,11 @@ def cluster_targets(files, output, params):
     return 0
 
 
-def make_dict_cd_hit(data):
-    cols = []  # targets are always the columns
-    out_dict = {}
-    clusterrep = "No Target"
-    for item in tqdm(range(data.shape[0])):
-        if data.iat[item, 4] == 1:
-            clusterrep = data.iat[item, 0]
-            cols += [clusterrep]
-            out_dict.update({clusterrep: clusterrep})
-        else:
-            out_dict.update({data.iat[item, 0]: clusterrep})
-
-    return cols, out_dict
-
-
 def make_dict_mayachemtools(data):
+    """
+    :param data: clustered drugs created by mayachemtools
+    :return: a list of row names, a dictionary of all drugs as keys and the representatives as values
+    """
     rows = []  # drugs are always the rows
     out_dict = {}
     last_cluster = data.iat[0, 2]  # first cluster id
@@ -149,7 +168,36 @@ def make_dict_mayachemtools(data):
     return rows, out_dict
 
 
+def make_dict_cd_hit(data):
+    """
+    :param data: target representatives created by CD-Hit
+    :return: a list of column names, a dictionary of all targets as keys and the representatives as values
+    """
+    cols = []  # targets are always the columns
+    out_dict = {}
+    clusterrep = "No Target"
+    for item in tqdm(range(data.shape[0])):
+        if data.iat[item, 4] == 1:
+            clusterrep = data.iat[item, 0]
+            cols += [clusterrep]
+            out_dict.update({clusterrep: clusterrep})
+        else:
+            out_dict.update({data.iat[item, 0]: clusterrep})
+
+    return cols, out_dict
+
+
 def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
+    """
+    :param col_names: column names returned from make_dict_cd_hit
+    :param row_names: row names returned from make_dict_mayachemtools
+    :param files: for the file path as specified in the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :param params: integer for maximum drug smile length, and characters that shouldn't appear in the drugs
+    :type: int, list
+    :return: two frames required for the creation of the affinity matrix, a list of drugs that cause errors, also
+    creates a new interaction file needed in update interactions
+    """
     frame_a = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
     frame_b = pd.DataFrame(0.0, columns=col_names, index=row_names, dtype=float)
 
@@ -208,6 +256,19 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
 
 
 def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output, kd_pkd=False):
+    """
+    :param data: interaction file created by drop_unwanted_troublemakers
+    :param frame_a: frame created by drop_unwanted_troublemakers, holds the sum of the interaction values for
+    one cluster
+    :param frame_b: frame created by drop_unwanted_troublemakers, holds the number of the interaction values for
+    one cluster
+    :param dict_of_drugs: dictionary of drugs created by make_dict_mayachemtools
+    :param dict_of_targets: dictionary of targets created by make_dict_cd_hit
+    :param files: for the file path as specified in the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :param kd_pkd: parameter that decides if Kd values should be also transformed into pKd values
+    :return: drugs and compounds that cause errors for saving, creates the final interaction file
+    """
     if kd_pkd:
         data = data.apply(lambda x: -np.log10(x / 1e9))
 
@@ -245,6 +306,13 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
 
 
 def save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output):
+    """
+    :param compounds_appearing_more_than_once: output of drop_unwanted_troublemakers
+    :param key_errors: output of update_interactions
+    :param files: for the file path as specified in the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :return: saves a file with drugs and compounds that caused errors
+    """
     lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
     for tautomere in compounds_appearing_more_than_once:
         lines_to_write += [tautomere + '\n']
@@ -255,3 +323,5 @@ def save_problematic_drugs_targets(compounds_appearing_more_than_once, key_error
     key_error_file = open(files['path'] + output['key_errors'], 'w')
     key_error_file.writelines(lines_to_write)
     key_error_file.close()
+
+    return 0
