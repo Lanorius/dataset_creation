@@ -249,7 +249,7 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     '''
 
     intermediate_drugs.to_csv(files['path'] + output['intermediate_drug_representatives'], sep='\t')
-    # TODO: You need to create a proper clustered drugs output file
+    # TODO: You need to create a proper clustered drugs output file, currently the intermediate is the finished one
     interaction_file.to_csv(files['path'] + output['intermediate_interaction_file'], sep='\t')
 
     return frame_a, frame_b, compounds_appearing_more_than_once
