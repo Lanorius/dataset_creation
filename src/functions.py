@@ -101,10 +101,9 @@ def cluster_drugs(files, output, params):
     # For this part you need mayachemtools which uses RDKit and you can find it here:
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
-    clustering_process = params['mayachemtools_path'] + ' --butinaSimilarityCutoff ' + \
-                         params['smile_similarity'] + ' --butinaReordering=yes ' + \
-                         '-i ' + files['path'] + output['drug_file'] + \
-                         ' -o ' + files['path'] + output['clustered_drugs']
+    clustering_process = params['mayachemtools_path'] + ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
+        ' --butinaReordering=yes ' + '-i ' + files['path'] + output['drug_file'] + \
+        ' -o ' + files['path'] + output['clustered_drugs']
     subprocess.call(clustering_process, shell=True)
 
     return 0
