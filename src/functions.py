@@ -300,7 +300,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
     dicttoh5(box_plot_dict, h5file=files['path']+output['box_plot_dict'], h5path=files['path'], mode='w',
              overwrite_data=None, create_dataset_args=None, update_mode=None)
 
-    frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep='\t')
+    frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep=',')
     return key_errors
 
 
