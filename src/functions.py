@@ -1,5 +1,5 @@
 import pandas as pd
-import math  # to calculate better chunk sizes
+import math  # to calculate better chunk sizes, and remove nans from frequency lists
 import os  # to remove intermediate files
 import subprocess  # to run CD-Hit and mayachemtools
 from tqdm import tqdm  # shows progress of a few loops
@@ -7,11 +7,7 @@ import traceback  # needed in update_interactions
 import numpy as np
 from silx.io.dictdump import dicttoh5  # to save h5 files
 from ast import literal_eval
-
-"""
-:param embeddings: path to reduced embedding file in h5 format
-:type embeddings: str
-"""
+import matplotlib.pyplot as plt
 
 
 def raw_transformer(files, file_specifications, output):
@@ -40,17 +36,19 @@ def raw_transformer(files, file_specifications, output):
                                                                         errors='coerce')
         chunk = chunk.dropna(how='any', subset=[file_specifications['interaction_value']])
         cleaned_frame = pd.concat([cleaned_frame, chunk])
-    cleaned_frame.to_csv(files['path']+output['cleaned_frame'], sep='\t')
+    cleaned_frame.to_csv(files['path'] + output['cleaned_frame'], sep='\t')
 
     return 0
 
 
-def create_raw_files(files, file_specifications, output):
+def create_raw_files(files, file_specifications, output, kd_pkd=False, save_affinity=False):
     """
     :param files: input files and path parsed from the config
     :param file_specifications: information about the columns of the input, parsed from the config
     :param output: intermediate output or final output file names, names specified in the config
-    :return: no value is returned, creates the drug, target and interaction files
+    :param kd_pkd:  parameter that decides if Kd values should be also transformed into pKd values
+    :param save_affinity: saves a hist about affinity information and also saves the affinity data to a file
+    :return: no value is returned, creates the drug, target and interaction files, creates affinity value plot
     """
     f = open(files['path'] + output['target_file'], 'w')
     d = open('temp_drugs.txt', 'w')
@@ -82,10 +80,26 @@ def create_raw_files(files, file_specifications, output):
 
     interactions = file.pivot_table(index=file_specifications['ligand_IDs'], columns=file_specifications['protein_IDs'],
                                     values=file_specifications['interaction_value'], aggfunc='sum')
+    if kd_pkd:
+        interactions = interactions.apply(lambda x: -np.log10(x / 1e9))
     interactions.to_csv(files['path'] + output['interaction_file'], sep='\t')
 
     f.close()
     d.close()
+
+    if save_affinity:
+        flat_interactions = [val for sublist in interactions.values.tolist() for val in sublist]
+        flat_interactions = [x for x in flat_interactions if math.isfinite(x)]
+        plt.hist(flat_interactions, bins=(math.ceil(max(flat_interactions))+math.ceil(min(flat_interactions))))
+        plt.title("Interaction Values before clustering.")
+        plt.xlabel("Values")
+        plt.ylabel("Frequencies")
+        plt.savefig(files['path'] + output['affinity_plot_before_clustering'])
+
+        with open(files['path'] + output['binding_affinity_values_before'], "w") as g:
+            for s in flat_interactions:
+                g.write(str(s) + " ")
+                g.write("\n")
 
     return 0
 
@@ -102,8 +116,8 @@ def cluster_drugs(files, output, params):
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
     clustering_process = params['mayachemtools_path'] + ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
-        ' --butinaReordering=yes ' + '-i ' + files['path'] + output['drug_file'] + \
-        ' -o ' + files['path'] + output['clustered_drugs']
+                         ' --butinaReordering=yes ' + '-i ' + files['path'] + output['drug_file'] + \
+                         ' -o ' + files['path'] + output['clustered_drugs']
     subprocess.call(clustering_process, shell=True)
 
     return 0
@@ -254,7 +268,7 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     return frame_a, frame_b, compounds_appearing_more_than_once
 
 
-def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output, kd_pkd=False):
+def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output, save_affinity=False):
     """
     :param data: interaction file created by drop_unwanted_troublemakers
     :param frame_a: frame created by drop_unwanted_troublemakers, holds the sum of the interaction values for
@@ -265,11 +279,9 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
     :param dict_of_targets: dictionary of targets created by make_dict_cd_hit
     :param files: for the file path as specified in the config
     :param output: intermediate output or final output file names, names specified in the config
-    :param kd_pkd: parameter that decides if Kd values should be also transformed into pKd values
+    :param save_affinity: saves a hist about affinity information and also saves the affinity data to a file
     :return: drugs and compounds that cause errors for saving, creates the final interaction file
     """
-    if kd_pkd:
-        data = data.apply(lambda x: -np.log10(x / 1e9))
 
     key_errors = []
     box_plot_dict = {}  # to create some visualizations of the data
@@ -282,12 +294,12 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                 try:
                     frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
                     frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
-                    box_key = str(index)+'_'+str(name)
+                    box_key = str(index) + '_' + str(name)
                     if box_key in box_plot_dict:
                         box_plot_dict[box_key] += [data.at[index, name]]
                     else:
                         box_plot_dict[box_key] = [data.at[index, name]]
-                except (Exception, ):  # Probably not 100% elegant
+                except (Exception,):  # Probably not 100% elegant
                     error_msg = traceback.format_exc()
                     key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
     print('Updating Interactions Part 2/2. Done by: ' + str(frame_a.shape[1]))
@@ -297,10 +309,26 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                 frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
             else:
                 frame_a.at[index, name] = np.nan
-    dicttoh5(box_plot_dict, h5file=files['path']+output['box_plot_dict'], h5path=files['path'], mode='w',
+    dicttoh5(box_plot_dict, h5file=files['path'] + output['box_plot_dict'], h5path=files['path'], mode='w',
              overwrite_data=None, create_dataset_args=None, update_mode=None)
 
     frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep=',')
+
+    flat_interactions = [val for sublist in frame_a.values.tolist() for val in sublist]
+    flat_interactions = [x for x in flat_interactions if math.isfinite(x)]
+    plt.clf()
+    plt.hist(flat_interactions, bins=(math.ceil(max(flat_interactions))+math.ceil(min(flat_interactions))))
+    plt.title("Interaction Values after clustering.")
+    plt.xlabel("Values")
+    plt.ylabel("Frequencies")
+    plt.savefig(files['path'] + output['affinity_plot_after_clustering'])
+
+    if save_affinity:
+        with open(files['path'] + output['binding_affinity_values_after'], "w") as g:
+            for s in flat_interactions:
+                g.write(str(s) + " ")
+                g.write("\n")
+
     return key_errors
 
 

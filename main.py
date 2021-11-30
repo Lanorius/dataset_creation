@@ -38,7 +38,8 @@ if not os.path.isdir(files['path']):
 if tasks_to_perform[0]:
     print("Part 1: Performing raw transformation and creating drug, target, and interaction files.")
     raw_transformer(files, file_specifications, output)
-    create_raw_files(files, file_specifications, output)
+    create_raw_files(files, file_specifications, output, kd_pkd=sub_tasks_to_perform[0],
+                     save_affinity=sub_tasks_to_perform[1])
 else:
     print("Part 1: Skipping raw transformation, and the creating of drug, target, and interaction files.")
 
@@ -69,7 +70,7 @@ if tasks_to_perform[3]:
 
     data = pd.read_csv(files['path']+output['intermediate_interaction_file'], sep='\t', header=0, index_col=0)
     key_errors = update_interactions(data, frame_a, frame_b, drug_dict, target_dict, files, output,
-                                     kd_pkd=sub_tasks_to_perform[0])
+                                     sub_tasks_to_perform[1])
 
     save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output)
 
