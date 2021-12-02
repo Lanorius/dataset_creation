@@ -8,6 +8,7 @@ import numpy as np
 from silx.io.dictdump import dicttoh5  # to save h5 files
 from ast import literal_eval
 import matplotlib.pyplot as plt
+import time  # not needed for any function, only used to make the output nicer
 
 
 def raw_transformer(files, file_specifications, output):
@@ -286,6 +287,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
     key_errors = []
     box_plot_dict = {}  # to create some visualizations of the data
     print('Updating Interactions Part 1/2. Done by: ' + str(data.shape[1]))
+    time.sleep(1)
     for name, _ in tqdm(data.iteritems()):
         for index, _ in data.iterrows():
             # print(data.at[index, name])
@@ -303,6 +305,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                     error_msg = traceback.format_exc()
                     key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
     print('Updating Interactions Part 2/2. Done by: ' + str(frame_a.shape[1]))
+    time.sleep(1)
     for name, _ in tqdm(frame_a.iteritems()):
         for index, _ in frame_a.iterrows():
             if frame_a.at[index, name] != 0:
@@ -314,16 +317,16 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
 
     frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep=',')
 
-    flat_interactions = [val for sublist in frame_a.values.tolist() for val in sublist]
-    flat_interactions = [x for x in flat_interactions if math.isfinite(x)]
-    plt.clf()
-    plt.hist(flat_interactions, bins=(math.ceil(max(flat_interactions))+math.ceil(min(flat_interactions))))
-    plt.title("Interaction Values after clustering.")
-    plt.xlabel("Values")
-    plt.ylabel("Frequencies")
-    plt.savefig(files['path'] + output['affinity_plot_after_clustering'])
-
     if save_affinity:
+        plt.clf()
+        flat_interactions = [val for sublist in frame_a.values.tolist() for val in sublist]
+        flat_interactions = [x for x in flat_interactions if math.isfinite(x)]
+        plt.hist(flat_interactions, bins=(math.ceil(max(flat_interactions)) + math.ceil(min(flat_interactions))))
+        plt.title("Interaction Values after clustering.")
+        plt.xlabel("Values")
+        plt.ylabel("Frequencies")
+        plt.savefig(files['path'] + output['affinity_plot_after_clustering'])
+
         with open(files['path'] + output['binding_affinity_values_after'], "w") as g:
             for s in flat_interactions:
                 g.write(str(s) + " ")
