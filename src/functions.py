@@ -70,7 +70,7 @@ def create_raw_files(files, file_specifications, output, kd_pkd=False, save_affi
         if i % 40 != 0:
             f.write("\n")
 
-        d.write(row[file_specifications['ligand_SMILE']] + " " + row[file_specifications['ligand_IDs']] + "\n")
+        d.write(row[file_specifications['ligand_SMILE']] + " " + str(row[file_specifications['ligand_IDs']]) + "\n")
 
     # ensures the output is a csv file
     # all duplicate lines are removed here from the drugs as well
@@ -345,7 +345,7 @@ def save_problematic_drugs_targets(compounds_appearing_more_than_once, key_error
     """
     lines_to_write = ["Drug ids of tautomeres, that RDKit doesn't put in the same cluster:\n"]
     for tautomere in compounds_appearing_more_than_once:
-        lines_to_write += [tautomere + '\n']
+        lines_to_write += [str(tautomere) + '\n']
     lines_to_write += ["\nDrug and Target ids that are not in any cluster:\n"]
     key_errors = list(set(key_errors))
     for key_error in key_errors:
