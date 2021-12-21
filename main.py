@@ -14,7 +14,7 @@ from src.functions import *
 # import matplotlib.pyplot as plt  # for the boxplots
 
 
-# TODO: What is the input? Format it the way Kyra did
+
 '''
 One idea would be to expect the user to do a very basic level of preprocessing
 This document will be much more powerful if we can expect the input to be the following:
@@ -37,7 +37,7 @@ if not os.path.isdir(files['path']):
 # PART 1 Raw Transformation
 if tasks_to_perform[0]:
     print("Part 1: Performing raw transformation and creating drug, target, and interaction files.")
-    raw_transformer(files, file_specifications, output)
+    raw_transformer(files, file_specifications, output, params)
     create_raw_files(files, file_specifications, output, kd_pkd=sub_tasks_to_perform[0],
                      save_affinity=sub_tasks_to_perform[1])
 else:

@@ -11,12 +11,13 @@ import matplotlib.pyplot as plt
 import time  # not needed for any function, only used to make the output nicer
 
 
-def raw_transformer(files, file_specifications, output):
+def raw_transformer(files, file_specifications, output, params):
     """
     :param files: input files and path parsed from the config
     :param file_specifications: information about the columns of the input, parsed from the config
     :param output: intermediate output or final output file names, names specified in the config
-    :return: no value is returned, but a clean_frame file is created which hold only the information of interest
+    :param params: only target_length is needed here
+    :return: no value is returned, but a clean_frame file is created which holds only the information needed later
     """
 
     # takes a data_set, like the one from BindingDB and does a basic cleanup to it
@@ -29,10 +30,9 @@ def raw_transformer(files, file_specifications, output):
     chunksize = math.ceil(len(list(open(files['raw_file']))) / 5)  # allows handeling large sets of input data
     for chunk in pd.read_csv(filepath_or_buffer=files['raw_file'], sep=file_specifications['separator'],
                              chunksize=chunksize, usecols=cols, on_bad_lines='skip', engine='python'):
-        # chunk = chunk[chunk['Target Source Organism According to Curator or DataSource'] == "Homo sapiens"]
-        # removed from the config for now, since we want a general understanding of binding
         chunk = chunk.dropna(how='any', subset=[file_specifications['protein_IDs']])
         chunk = chunk.dropna(how='any', subset=[file_specifications['ligand_IDs']])
+        chunk = chunk[chunk[file_specifications['protein_sequence']].apply(len) <= int(params['target_length'])]
         chunk[file_specifications['interaction_value']] = pd.to_numeric(chunk[file_specifications['interaction_value']],
                                                                         errors='coerce')
         chunk = chunk.dropna(how='any', subset=[file_specifications['interaction_value']])
@@ -117,8 +117,8 @@ def cluster_drugs(files, output, params):
     # http://www.mayachemtools.org/docs/scripts/html/index.html
 
     clustering_process = params['mayachemtools_path'] + ' --butinaSimilarityCutoff ' + params['smile_similarity'] + \
-                         ' --butinaReordering=yes ' + '-i ' + files['path'] + output['drug_file'] + \
-                         ' -o ' + files['path'] + output['clustered_drugs']
+                         ' --butinaReordering=yes ' + '-i ' + files['path'] + output['drug_file'] + ' -o ' + \
+                         files['path'] + output['clustered_drugs']
     subprocess.call(clustering_process, shell=True)
 
     return 0
