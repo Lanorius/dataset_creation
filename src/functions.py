@@ -42,13 +42,12 @@ def raw_transformer(files, file_specifications, output, params):
     return 0
 
 
-def create_raw_files(files, file_specifications, output, kd_pkd=False, save_affinity=False):
+def create_raw_files(files, file_specifications, output, kd_pkd=False):
     """
     :param files: input files and path parsed from the config
     :param file_specifications: information about the columns of the input, parsed from the config
     :param output: intermediate output or final output file names, names specified in the config
     :param kd_pkd:  parameter that decides if Kd values should be also transformed into pKd values
-    :param save_affinity: saves a hist about affinity information and also saves the affinity data to a file
     :return: no value is returned, creates the drug, target and interaction files, creates affinity value plot
     """
     f = open(files['path'] + output['target_file'], 'w')
@@ -88,19 +87,55 @@ def create_raw_files(files, file_specifications, output, kd_pkd=False, save_affi
     f.close()
     d.close()
 
-    if save_affinity:
-        flat_interactions = [val for sublist in interactions.values.tolist() for val in sublist]
-        flat_interactions = [x for x in flat_interactions if math.isfinite(x)]
-        plt.hist(flat_interactions, bins=(math.ceil(max(flat_interactions))+math.ceil(min(flat_interactions))))
-        plt.title("Interaction Values before clustering.")
+    return 0
+
+
+def save_affinity_values_plot(files, output, before_after, create_plots):
+    # TODO: constant bins
+    """
+    :param files: input files and path parsed from the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :param before_after: either "before" or "after" the clustering process
+    :param create_plots: True if values have been transformed from Kd to pKd, else False
+    :return: no value is returned, creates affinity value plot
+    """
+    if before_after == "before":
+        interactions = pd.read_csv(files['path'] + output['interaction_file'], sep='\t')
+    elif before_after == "after":
+        interactions = pd.read_csv(files['path'] + output['cleaned_interaction_file'], sep=',')
+    else:
+        raise ValueError("Wrong input: before_after can only either be a string value before or after.")
+
+    flat_interactions = [val for sublist in interactions.values.tolist() for val in sublist]
+    flat_interactions = [x for x in flat_interactions if math.isfinite(x)]
+
+    if create_plots:
+        plt.hist(flat_interactions, bins=(math.ceil(max(flat_interactions)) + math.ceil(min(flat_interactions))))
         plt.xlabel("Values")
         plt.ylabel("Frequencies")
-        plt.savefig(files['path'] + output['affinity_plot_before_clustering'])
 
+    if before_after == "before":
         with open(files['path'] + output['binding_affinity_values_before'], "w") as g:
             for s in flat_interactions:
                 g.write(str(s) + " ")
                 g.write("\n")
+
+        if create_plots:
+            plt.title("Interaction Values before clustering.")
+            plt.savefig(files['path'] + output['affinity_plot_before_clustering'])
+
+    elif before_after == "after":
+        with open(files['path'] + output['binding_affinity_values_after'], "w") as g:
+            for s in flat_interactions:
+                g.write(str(s) + " ")
+                g.write("\n")
+
+        if create_plots:
+            plt.title("Interaction Values after clustering.")
+            plt.savefig(files['path'] + output['affinity_plot_after_clustering'])
+
+    else:
+        pass
 
     return 0
 
@@ -269,7 +304,7 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     return frame_a, frame_b, compounds_appearing_more_than_once
 
 
-def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output, save_affinity=False):
+def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output):
     """
     :param data: interaction file created by drop_unwanted_troublemakers
     :param frame_a: frame created by drop_unwanted_troublemakers, holds the sum of the interaction values for
@@ -280,7 +315,6 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
     :param dict_of_targets: dictionary of targets created by make_dict_cd_hit
     :param files: for the file path as specified in the config
     :param output: intermediate output or final output file names, names specified in the config
-    :param save_affinity: saves a hist about affinity information and also saves the affinity data to a file
     :return: drugs and compounds that cause errors for saving, creates the final interaction file
     """
 
@@ -316,21 +350,6 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
              overwrite_data=None, create_dataset_args=None, update_mode=None)
 
     frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep=',')
-
-    if save_affinity:
-        plt.clf()
-        flat_interactions = [val for sublist in frame_a.values.tolist() for val in sublist]
-        flat_interactions = [x for x in flat_interactions if math.isfinite(x)]
-        plt.hist(flat_interactions, bins=(math.ceil(max(flat_interactions)) + math.ceil(min(flat_interactions))))
-        plt.title("Interaction Values after clustering.")
-        plt.xlabel("Values")
-        plt.ylabel("Frequencies")
-        plt.savefig(files['path'] + output['affinity_plot_after_clustering'])
-
-        with open(files['path'] + output['binding_affinity_values_after'], "w") as g:
-            for s in flat_interactions:
-                g.write(str(s) + " ")
-                g.write("\n")
 
     return key_errors
 

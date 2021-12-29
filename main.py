@@ -14,7 +14,7 @@ from src.functions import *
 # import matplotlib.pyplot as plt  # for the boxplots
 
 
-
+# TODO: change this comment
 '''
 One idea would be to expect the user to do a very basic level of preprocessing
 This document will be much more powerful if we can expect the input to be the following:
@@ -38,10 +38,16 @@ if not os.path.isdir(files['path']):
 if tasks_to_perform[0]:
     print("Part 1: Performing raw transformation and creating drug, target, and interaction files.")
     raw_transformer(files, file_specifications, output, params)
-    create_raw_files(files, file_specifications, output, kd_pkd=sub_tasks_to_perform[0],
-                     save_affinity=sub_tasks_to_perform[1])
+    create_raw_files(files, file_specifications, output, kd_pkd=sub_tasks_to_perform[0])
 else:
     print("Part 1: Skipping raw transformation, and the creating of drug, target, and interaction files.")
+
+
+if sub_tasks_to_perform[1]:
+    print("Part 1.2: Creating plot for affinity values, before clustering.")
+    save_affinity_values_plot(files, output, before_after="before", create_plots=sub_tasks_to_perform[0])
+else:
+    print("Part 1.2: Skipping plot for affinity values, before clustering.")
 
 # PART 2 Clustering
 if tasks_to_perform[1]:
@@ -69,8 +75,8 @@ if tasks_to_perform[3]:
                                                                                        output, params)
 
     data = pd.read_csv(files['path']+output['intermediate_interaction_file'], sep='\t', header=0, index_col=0)
-    key_errors = update_interactions(data, frame_a, frame_b, drug_dict, target_dict, files, output,
-                                     sub_tasks_to_perform[1])
+    key_errors = update_interactions(data, frame_a, frame_b, drug_dict, target_dict, files, output)
+    #                                 sub_tasks_to_perform[1] # TODO: it's here
 
     save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output)
 
