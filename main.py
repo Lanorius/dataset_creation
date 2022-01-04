@@ -57,13 +57,13 @@ else:
     print("Part 2: Skipping Drug Clusters.")
 
 if tasks_to_perform[2]:
-    print("Part 2.1: Creating Target Clusters.")
+    print("Part 3: Creating Target Clusters.")
     cluster_targets(files, output, params)
 else:
-    print("Part 2.2: Skipping Target Clusters.")
+    print("Part 3: Skipping Target Clusters.")
 
 if tasks_to_perform[3]:
-    print("Part 3: Preparing the files for DTI.")
+    print("Part 4: Preparing the files for DTI.")
 
     row_names, drug_dict = make_dict_mayachemtools(pd.read_csv(files['path'] +
                                                                output['clustered_drugs'], sep=','))
@@ -81,4 +81,4 @@ if tasks_to_perform[3]:
     save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output)
 
 else:
-    print("Part 3: Skipping the preparation of the files for DTI.")
+    print("Part 4: Skipping the preparation of the files for DTI.")
