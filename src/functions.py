@@ -91,7 +91,7 @@ def create_raw_files(files, file_specifications, output, kd_pkd=False):
 
 
 def save_affinity_values_plot(files, output, before_after, create_plots):
-    # TODO: constant bins
+    # TODO: maybe constant bins
     """
     :param files: input files and path parsed from the config
     :param output: intermediate output or final output file names, names specified in the config
@@ -100,9 +100,9 @@ def save_affinity_values_plot(files, output, before_after, create_plots):
     :return: no value is returned, creates affinity value plot
     """
     if before_after == "before":
-        interactions = pd.read_csv(files['path'] + output['interaction_file'], sep='\t')
+        interactions = pd.read_csv(files['path'] + output['interaction_file'], sep='\t', header=0, index_col=0)
     elif before_after == "after":
-        interactions = pd.read_csv(files['path'] + output['cleaned_interaction_file'], sep=',')
+        interactions = pd.read_csv(files['path'] + output['cleaned_interaction_file'], sep=',', header=0, index_col=0)
     else:
         raise ValueError("Wrong input: before_after can only either be a string value before or after.")
 
@@ -123,6 +123,7 @@ def save_affinity_values_plot(files, output, before_after, create_plots):
         if create_plots:
             plt.title("Interaction Values before clustering.")
             plt.savefig(files['path'] + output['affinity_plot_before_clustering'])
+            plt.clf()
 
     elif before_after == "after":
         with open(files['path'] + output['binding_affinity_values_after'], "w") as g:
@@ -133,6 +134,7 @@ def save_affinity_values_plot(files, output, before_after, create_plots):
         if create_plots:
             plt.title("Interaction Values after clustering.")
             plt.savefig(files['path'] + output['affinity_plot_after_clustering'])
+            plt.clf()
 
     else:
         pass
@@ -328,8 +330,12 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
             # print(type(data.at[index, name]))
             if data.at[index, name] > 0:
                 try:
-                    frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
+                    frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]  # check if you are creating these correctly
                     frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
+                    if frame_b.at[dict_of_drugs[index], dict_of_targets[name]] > 1:
+                        print("good")
+                        print(frame_a.at[dict_of_drugs[index], dict_of_targets[name]])
+                        print(frame_b.at[dict_of_drugs[index], dict_of_targets[name]])
                     box_key = str(index) + '_' + str(name)
                     if box_key in box_plot_dict:
                         box_plot_dict[box_key] += [data.at[index, name]]
