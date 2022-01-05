@@ -322,6 +322,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
 
     key_errors = []
     box_plot_dict = {}  # to create some visualizations of the data
+
     print('Updating Interactions Part 1/2. Done by: ' + str(data.shape[1]))
     time.sleep(1)
     for name, _ in tqdm(data.iteritems()):
@@ -330,13 +331,9 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
             # print(type(data.at[index, name]))
             if data.at[index, name] > 0:
                 try:
-                    frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]  # check if you are creating these correctly
+                    frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
                     frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
-                    if frame_b.at[dict_of_drugs[index], dict_of_targets[name]] > 1:
-                        print("good")
-                        print(frame_a.at[dict_of_drugs[index], dict_of_targets[name]])
-                        print(frame_b.at[dict_of_drugs[index], dict_of_targets[name]])
-                    box_key = str(index) + '_' + str(name)
+                    box_key = str(dict_of_drugs[index]) + '_' + str(dict_of_targets[name])
                     if box_key in box_plot_dict:
                         box_plot_dict[box_key] += [data.at[index, name]]
                     else:
@@ -344,6 +341,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                 except (Exception,):  # Probably not 100% elegant
                     error_msg = traceback.format_exc()
                     key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
+
     print('Updating Interactions Part 2/2. Done by: ' + str(frame_a.shape[1]))
     time.sleep(1)
     for name, _ in tqdm(frame_a.iteritems()):
