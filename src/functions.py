@@ -5,10 +5,13 @@ import subprocess  # to run CD-Hit and mayachemtools
 from tqdm import tqdm  # shows progress of a few loops
 import traceback  # needed in update_interactions
 import numpy as np
-from silx.io.dictdump import dicttoh5  # to save h5 files
+from silx.io.dictdump import dicttoh5, h5todict  # to save and load h5 files
 from ast import literal_eval
 import matplotlib.pyplot as plt
 import time  # not needed for any function, only used to make the output nicer
+import seaborn as sns
+import random
+import statistics
 
 
 def raw_transformer(files, file_specifications, output, params):
@@ -321,7 +324,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
     """
 
     key_errors = []
-    box_plot_dict = {}  # to create some visualizations of the data
+    boxplot_dict = {}  # to create some visualizations of the data
 
     print('Updating Interactions Part 1/2. Done by: ' + str(data.shape[1]))
     time.sleep(1)
@@ -334,10 +337,10 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                     frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
                     frame_b.at[dict_of_drugs[index], dict_of_targets[name]] += 1
                     box_key = str(dict_of_drugs[index]) + '_' + str(dict_of_targets[name])
-                    if box_key in box_plot_dict:
-                        box_plot_dict[box_key] += [data.at[index, name]]
+                    if box_key in boxplot_dict:
+                        boxplot_dict[box_key] += [data.at[index, name]]
                     else:
-                        box_plot_dict[box_key] = [data.at[index, name]]
+                        boxplot_dict[box_key] = [data.at[index, name]]
                 except (Exception,):  # Probably not 100% elegant
                     error_msg = traceback.format_exc()
                     key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
@@ -350,7 +353,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
                 frame_a.at[index, name] = frame_a.at[index, name] / frame_b.at[index, name]
             else:
                 frame_a.at[index, name] = np.nan
-    dicttoh5(box_plot_dict, h5file=files['path'] + output['box_plot_dict'], h5path=files['path'], mode='w',
+    dicttoh5(boxplot_dict, h5file=files['path'] + output['boxplot_dict'], h5path=files['path'], mode='w',
              overwrite_data=None, create_dataset_args=None, update_mode=None)
 
     frame_a.to_csv(files['path'] + output['cleaned_interaction_file'], sep=',')
@@ -376,5 +379,66 @@ def save_problematic_drugs_targets(compounds_appearing_more_than_once, key_error
     key_error_file = open(files['path'] + output['key_errors'], 'w')
     key_error_file.writelines(lines_to_write)
     key_error_file.close()
+
+    return 0
+
+
+def sample_from_dict(d, sample):
+    keys = random.sample(list(d), sample)
+    values = [d[k] for k in keys]
+    # return dict(zip(keys, values))
+    return keys, values
+
+
+def boxplot_creator(file, out_file, file_specifications, min_bin_size, sample_size):
+    """
+    :param file: boxplot data file
+    :param out_file: boxplot image file
+    :param file_specifications: for compound and protein ids
+    :param min_bin_size: min amount of drug target pairs that a cluster needs to have
+    :param sample_size: number of randomly drawn drug target clusters/plots that will be created
+    :return: saves a boxplot png
+    """
+
+    raw_data = h5todict(file)
+    # TODO: Maybe find a way to fix this. This step is needed, since silx
+    #  saves the dict in a separate dict for every folder down the path.
+    while len(raw_data) == 1:
+        raw_data = raw_data[list(raw_data.keys())[0]]
+
+    dict_with_many_values = {}
+
+    for key in raw_data.keys():
+        # Still deciding on which bins have enough data for the boxplot.
+        # The integer here decides how many values have to be at least present to be considered for the boxplot.
+        if len(raw_data[key]) > min_bin_size:
+            dict_with_many_values[key] = raw_data[key]
+
+    keys, values = sample_from_dict(dict_with_many_values, sample_size)
+
+    means = [statistics.mean(x) for x in values]
+    keys = [x for _, x in sorted(zip(means, keys))]
+    values = [x for _, x in sorted(zip(means, values))]
+    frame = pd.DataFrame(columns=["Keys", "Values", "Interacting"])
+    for i in range(len(keys)):
+        for value in values[i]:
+            if file_specifications['ligand_IDs'] == "PubChem CID":
+                key = " ".join(keys[i].split(".0_"))
+            else:
+                key = keys[i]
+            new_row = {'Keys': key, 'Values': value, "Interacting": "Yes" if value < 7 else "No"}
+            frame = frame.append(new_row, ignore_index=True)
+
+    sns.boxplot(x='Keys', y='Values', data=frame, color="cornflowerblue")
+
+    sns.stripplot(x='Keys', y='Values', data=frame, linewidth=1, edgecolor="black", hue="Interacting")
+    plt.xticks(rotation=90)
+    # adding cutoff line
+    plt.axhline(y=7, color='r', linestyle='-')
+    plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
+    plt.title("Boxplot of pKd values of "+str(sample_size)+" random Clusters")
+    plt.tight_layout()
+    plt.savefig(out_file)
+    plt.clf()
 
     return 0

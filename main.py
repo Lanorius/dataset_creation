@@ -11,7 +11,7 @@ from src.functions import *
 
 # from tqdm import tqdm  # shows progress of for loops
 
-# import matplotlib.pyplot as plt  # for the boxplots
+# import matplotlib.pyplot as plt  # for the boxplot
 
 
 # TODO: change this comment
@@ -88,3 +88,10 @@ if sub_tasks_to_perform[1]:
     save_affinity_values_plot(files, output, before_after="after", create_plots=sub_tasks_to_perform[0])
 else:
     print("Part 4.2: Skipping plot for affinity values, after clustering.")
+
+if sub_tasks_to_perform[2]:
+    print("Part 4.2: Creating boxplot of clusters.")
+    boxplot_creator(files['path']+output['boxplot_dict'], files['path']+output['boxplot_file'], file_specifications,
+                    int(params['boxplot_min_elements_in_bin']), int(params['boxplot_number_of_random_clusters']))
+else:
+    print("Part 4.2: Skipping boxplot of clusters.")
