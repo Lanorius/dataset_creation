@@ -16,6 +16,9 @@ from src.functions import *
 
 # TODO: change this comment
 '''
+
+
+
 One idea would be to expect the user to do a very basic level of preprocessing
 This document will be much more powerful if we can expect the input to be the following:
     -a csv or tsv file including columns with protein IDs, protein sequences, compound IDs, 
@@ -63,7 +66,7 @@ else:
     print("Part 3: Skipping Target Clusters.")
 
 if tasks_to_perform[3]:
-    print("Part 4: Preparing the files for DTI.")
+    print("Part 4: Making the files DTI ready.")
 
     row_names, drug_dict = make_dict_mayachemtools(pd.read_csv(files['path'] +
                                                                output['clustered_drugs'], sep=','))
@@ -76,12 +79,11 @@ if tasks_to_perform[3]:
 
     data = pd.read_csv(files['path']+output['intermediate_interaction_file'], sep='\t', header=0, index_col=0)
     key_errors = update_interactions(data, frame_a, frame_b, drug_dict, target_dict, files, output)
-    #                                 sub_tasks_to_perform[1] # TODO: it's here
 
     save_problematic_drugs_targets(compounds_appearing_more_than_once, key_errors, files, output)
 
 else:
-    print("Part 4: Skipping the preparation of the files for DTI.")
+    print("Part 4: Skipping the making of the files DTI ready.")
 
 if sub_tasks_to_perform[1]:
     print("Part 4.2: Creating plot for affinity values, after clustering.")

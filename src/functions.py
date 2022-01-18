@@ -20,7 +20,8 @@ def raw_transformer(files, file_specifications, output, params):
     :param file_specifications: information about the columns of the input, parsed from the config
     :param output: intermediate output or final output file names, names specified in the config
     :param params: only target_length is needed here
-    :return: no value is returned, but a clean_frame file is created which holds only the information needed later
+    :return: no value is returned, but a clean_frame file is created which holds only the binding information
+    that is needed later
     """
 
     # takes a data_set, like the one from BindingDB and does a basic cleanup to it
@@ -35,7 +36,14 @@ def raw_transformer(files, file_specifications, output, params):
                              chunksize=chunksize, usecols=cols, on_bad_lines='skip', engine='python'):
         chunk = chunk.dropna(how='any', subset=[file_specifications['protein_IDs']])
         chunk = chunk.dropna(how='any', subset=[file_specifications['ligand_IDs']])
-        chunk = chunk[chunk[file_specifications['protein_sequence']].apply(len) <= int(params['target_length'])]
+        # TODO: experimental
+        if params['bad_characters'] != "":
+            chunk = chunk[~chunk[file_specifications['ligand_SMILE']].isin(literal_eval(params['bad_characters']))]
+        if params['drug_length'] != "":
+            chunk = chunk[chunk[file_specifications['ligand_SMILE']].apply(len) <= int(params['drug_length'])]
+        # TODO: experimental
+        if params['target_length'] != "":
+            chunk = chunk[chunk[file_specifications['protein_sequence']].apply(len) <= int(params['target_length'])]
         chunk[file_specifications['interaction_value']] = pd.to_numeric(chunk[file_specifications['interaction_value']],
                                                                         errors='coerce')
         chunk = chunk.dropna(how='any', subset=[file_specifications['interaction_value']])
@@ -94,7 +102,7 @@ def create_raw_files(files, file_specifications, output, kd_pkd=False):
 
 
 def save_affinity_values_plot(files, output, before_after, create_plots):
-    # TODO: maybe constant bins
+    # TODO: maybe add constant bins
     """
     :param files: input files and path parsed from the config
     :param output: intermediate output or final output file names, names specified in the config
@@ -241,13 +249,12 @@ def make_dict_cd_hit(data):
     return cols, out_dict
 
 
-def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
+def drop_unwanted_troublemakers(col_names, row_names, files, output):
     """
     :param col_names: column names returned from make_dict_cd_hit
     :param row_names: row names returned from make_dict_mayachemtools
     :param files: for the file path as specified in the config
     :param output: intermediate output or final output file names, names specified in the config
-    :param params: integer for maximum drug smile length, and characters that shouldn't appear in the drugs
     :type: int, list
     :return: two frames required for the creation of the affinity matrix, a list of drugs that cause errors, also
     creates a new interaction file needed in update interactions
@@ -269,38 +276,6 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output, params):
     frame_b = frame_b.drop(compounds_appearing_more_than_once)
     intermediate_drugs = intermediate_drugs.drop(compounds_appearing_more_than_once)
     interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
-
-    # Second, removing compounds that are either too long, or have unwanted characters. This step is optional.
-    # Removing compounds that are too long.
-    if len(params['drug_length']) > 0:
-        for i in tqdm(range(intermediate_drugs.shape[0] - 1, -1, -1)):
-            if len(intermediate_drugs.iat[i, 0]) > int(params['drug_length']):
-                interaction_file = interaction_file.drop(index=intermediate_drugs.index[i])
-                intermediate_drugs = intermediate_drugs.drop(index=intermediate_drugs.index[i])
-
-    # Removing compounds that have a character that can't be processed
-    if len(literal_eval(params['bad_characters'])) > 0:
-        for i in tqdm(range(intermediate_drugs.shape[0] - 1, -1, -1)):
-            if len([char for char in literal_eval(params['bad_characters'])
-                    if (char in intermediate_drugs.iat[i, 0])]) > 0:
-                interaction_file = interaction_file.drop(index=intermediate_drugs.index[i])
-                intermediate_drugs = intermediate_drugs.drop(index=intermediate_drugs.index[i])
-
-    # TODO: Works, but a small amount of compounds (11 for Kd_d08_t08) are getting lost, check if you have time.
-    '''
-    print(list(set(interaction_file.index)-set(intermediate_drugs.index)))
-    print(list(set(intermediate_drugs.index)-set(interaction_file.index)))
-
-    print(len(list(set(interaction_file.index))))
-    print(len(list(set(intermediate_drugs.index))))
-
-    # Compounds which should be in the drug_file but got lost
-    lost_compounds = list(set(interaction_file.index)-set(intermediate_drugs.index))
-    interaction_file = interaction_file.drop(lost_compounds)
-
-    compounds_lost = list(set(intermediate_drugs.index)-set(interaction_file.index))
-    intermediate_drugs = intermediate_drugs.drop(compounds_lost)
-    '''
 
     intermediate_drugs.to_csv(files['path'] + output['intermediate_drug_representatives'], sep='\t')
     # TODO: You need to create a proper clustered drugs output file, currently the intermediate is the finished one
@@ -330,8 +305,6 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
     time.sleep(1)
     for name, _ in tqdm(data.iteritems()):
         for index, _ in data.iterrows():
-            # print(data.at[index, name])
-            # print(type(data.at[index, name]))
             if data.at[index, name] > 0:
                 try:
                     frame_a.at[dict_of_drugs[index], dict_of_targets[name]] += data.at[index, name]
@@ -383,7 +356,7 @@ def save_problematic_drugs_targets(compounds_appearing_more_than_once, key_error
     return 0
 
 
-def sample_from_dict(d, sample):
+def sample_from_dict(d, sample):  # TODO: obsolete
     keys = random.sample(list(d), sample)
     values = [d[k] for k in keys]
     # return dict(zip(keys, values))
@@ -414,7 +387,9 @@ def boxplot_creator(file, out_file, file_specifications, min_bin_size, sample_si
         if len(raw_data[key]) > min_bin_size:
             dict_with_many_values[key] = raw_data[key]
 
-    keys, values = sample_from_dict(dict_with_many_values, sample_size)
+    keys = random.sample(list(dict_with_many_values), sample_size)
+    values = [dict_with_many_values[k] for k in keys]
+    # keys, values = sample_from_dict(dict_with_many_values, sample_size)
 
     means = [statistics.mean(x) for x in values]
     keys = [x for _, x in sorted(zip(means, keys))]
