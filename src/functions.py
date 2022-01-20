@@ -36,18 +36,19 @@ def raw_transformer(files, file_specifications, output, params):
                              chunksize=chunksize, usecols=cols, on_bad_lines='skip', engine='python'):
         chunk = chunk.dropna(how='any', subset=[file_specifications['protein_IDs']])
         chunk = chunk.dropna(how='any', subset=[file_specifications['ligand_IDs']])
-        # TODO: experimental
+        # chunk = chunk.dropna(how='any', subset=[file_specifications['interaction_value']])  # TODO: remove?
         if params['bad_characters'] != "":
-            chunk = chunk[~chunk[file_specifications['ligand_SMILE']].isin(literal_eval(params['bad_characters']))]
+            chunk = chunk[~chunk[file_specifications['ligand_SMILE']].str.contains('|'.join(literal_eval(
+                params['bad_characters'])))]
         if params['drug_length'] != "":
             chunk = chunk[chunk[file_specifications['ligand_SMILE']].apply(len) <= int(params['drug_length'])]
-        # TODO: experimental
         if params['target_length'] != "":
             chunk = chunk[chunk[file_specifications['protein_sequence']].apply(len) <= int(params['target_length'])]
         chunk[file_specifications['interaction_value']] = pd.to_numeric(chunk[file_specifications['interaction_value']],
                                                                         errors='coerce')
         chunk = chunk.dropna(how='any', subset=[file_specifications['interaction_value']])
         cleaned_frame = pd.concat([cleaned_frame, chunk])
+
     cleaned_frame.to_csv(files['path'] + output['cleaned_frame'], sep='\t')
 
     return 0
@@ -375,7 +376,7 @@ def boxplot_creator(file, out_file, file_specifications, min_bin_size, sample_si
 
     raw_data = h5todict(file)
     # TODO: Maybe find a way to fix this. This step is needed, since silx
-    #  saves the dict in a separate dict for every folder down the path.
+    #  saves the dict in a separate dict for every folder down the path the file is saved.
     while len(raw_data) == 1:
         raw_data = raw_data[list(raw_data.keys())[0]]
 
@@ -415,5 +416,7 @@ def boxplot_creator(file, out_file, file_specifications, min_bin_size, sample_si
     plt.tight_layout()
     plt.savefig(out_file)
     plt.clf()
+
+    print(frame)
 
     return 0
