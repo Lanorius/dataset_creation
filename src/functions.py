@@ -441,8 +441,6 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
         freq_list += [frame[(frame["Keys"] == row["Keys"]) & (frame["Interacting"] == row["Interacting"])].shape[0]]
     hist_frame["Freq"] = freq_list
 
-    print(hist_frame)
-
     sns.barplot(x="Keys", y="Freq", hue="Interacting", data=hist_frame)
     plt.xticks(rotation=90)
     # adding cutoff line
@@ -452,11 +450,5 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
     plt.tight_layout()
     plt.savefig(hist_out_file)
     plt.clf()
-
-
-    # data = frame.groupby(["Keys", "Interacting"]).size()
-    # print(data)
-    # print(data.loc[(data.index.get_level_values('Interacting') == "No")])
-    barwidth = 0.25
 
     return 0
