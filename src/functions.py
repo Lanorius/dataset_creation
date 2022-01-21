@@ -47,6 +47,7 @@ def raw_transformer(files, file_specifications, output, params):
         chunk[file_specifications['interaction_value']] = pd.to_numeric(chunk[file_specifications['interaction_value']],
                                                                         errors='coerce')
         chunk = chunk.dropna(how='any', subset=[file_specifications['interaction_value']])
+        chunk = chunk.loc[~(chunk[file_specifications['interaction_value']] == 0)]
         cleaned_frame = pd.concat([cleaned_frame, chunk])
 
     cleaned_frame.to_csv(files['path'] + output['cleaned_frame'], sep='\t')
@@ -364,14 +365,15 @@ def sample_from_dict(d, sample):  # TODO: obsolete
     return keys, values
 
 
-def boxplot_creator(file, out_file, file_specifications, min_bin_size, sample_size):
+def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, min_bin_size, sample_size):
     """
     :param file: boxplot data file
-    :param out_file: boxplot image file
+    :param boxplot_out_file: boxplot image file
+    :param hist_out_file: histogram image file
     :param file_specifications: for compound and protein ids
     :param min_bin_size: min amount of drug target pairs that a cluster needs to have
     :param sample_size: number of randomly drawn drug target clusters/plots that will be created
-    :return: saves a boxplot png
+    :return: saves a boxplot png and a hist png
     """
 
     raw_data = h5todict(file)
@@ -396,17 +398,19 @@ def boxplot_creator(file, out_file, file_specifications, min_bin_size, sample_si
     keys = [x for _, x in sorted(zip(means, keys))]
     values = [x for _, x in sorted(zip(means, values))]
     frame = pd.DataFrame(columns=["Keys", "Values", "Interacting"])
+
     for i in range(len(keys)):
         for value in values[i]:
             if file_specifications['ligand_IDs'] == "PubChem CID":
                 key = " ".join(keys[i].split(".0_"))
             else:
                 key = keys[i]
-            new_row = {'Keys': key, 'Values': value, "Interacting": "Yes" if value < 7 else "No"}
+            new_row = {'Keys': key, 'Values': value, "Interacting": "Yes" if value > 7 else "No"}
             frame = frame.append(new_row, ignore_index=True)
 
-    sns.boxplot(x='Keys', y='Values', data=frame, color="cornflowerblue")
+    # Boxplot
 
+    sns.boxplot(x='Keys', y='Values', data=frame, color="cornflowerblue")
     sns.stripplot(x='Keys', y='Values', data=frame, linewidth=1, edgecolor="black", hue="Interacting")
     plt.xticks(rotation=90)
     # adding cutoff line
@@ -414,9 +418,45 @@ def boxplot_creator(file, out_file, file_specifications, min_bin_size, sample_si
     plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
     plt.title("Boxplot of pKd values of "+str(sample_size)+" random Clusters")
     plt.tight_layout()
-    plt.savefig(out_file)
+    plt.savefig(boxplot_out_file)
     plt.clf()
 
-    print(frame)
+    # Hist
+
+    # pretty sure there is a nicer/faster way to do this,
+    # but df.groupby doesn't consider that some hists will only have yes or no
+    list_of_keys_all = list(frame["Keys"])
+    list_of_keys = []
+    for key in list_of_keys_all:
+        if key not in list_of_keys:
+            list_of_keys += [key]
+
+    hist_frame = pd.DataFrame(columns=["Keys", "Interacting", "Freq"])
+    for key in list_of_keys:
+        hist_frame = hist_frame.append({"Keys": key, "Interacting": "No"}, ignore_index=True)
+        hist_frame = hist_frame.append({"Keys": key, "Interacting": "Yes"}, ignore_index=True)
+
+    freq_list = []
+    for _, row in hist_frame.iterrows():
+        freq_list += [frame[(frame["Keys"] == row["Keys"]) & (frame["Interacting"] == row["Interacting"])].shape[0]]
+    hist_frame["Freq"] = freq_list
+
+    print(hist_frame)
+
+    sns.barplot(x="Keys", y="Freq", hue="Interacting", data=hist_frame)
+    plt.xticks(rotation=90)
+    # adding cutoff line
+    plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
+    plt.ylabel("Frequency")
+    plt.title("Histogram of pKd values of "+str(sample_size)+" random Clusters")
+    plt.tight_layout()
+    plt.savefig(hist_out_file)
+    plt.clf()
+
+
+    # data = frame.groupby(["Keys", "Interacting"]).size()
+    # print(data)
+    # print(data.loc[(data.index.get_level_values('Interacting') == "No")])
+    barwidth = 0.25
 
     return 0

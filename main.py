@@ -41,7 +41,7 @@ if not os.path.isdir(files['path']):
 if tasks_to_perform[0]:
     print("Part 1: Performing raw transformation and creating drug, target, and interaction files.")
     raw_transformer(files, file_specifications, output, params)
-    create_raw_files(files, file_specifications, output, kd_pkd=sub_tasks_to_perform[0])  # TODO: uncomment
+    create_raw_files(files, file_specifications, output, kd_pkd=sub_tasks_to_perform[0])
 else:
     print("Part 1: Skipping raw transformation, and the creating of drug, target, and interaction files.")
 
@@ -93,7 +93,8 @@ else:
 
 if sub_tasks_to_perform[2]:
     print("Part 4.2: Creating boxplot of clusters.")
-    boxplot_creator(files['path']+output['boxplot_dict'], files['path']+output['boxplot_file'], file_specifications,
-                    int(params['boxplot_min_elements_in_bin']), int(params['boxplot_number_of_random_clusters']))
+    boxplot_creator(files['path']+output['boxplot_dict'], files['path']+output['boxplot_file'],
+                    files['path']+output['hist_file'], file_specifications, int(params['boxplot_min_elements_in_bin']),
+                    int(params['boxplot_number_of_random_clusters']))
 else:
     print("Part 4.2: Skipping boxplot of clusters.")
