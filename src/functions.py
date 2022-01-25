@@ -55,12 +55,11 @@ def raw_transformer(files, file_specifications, output, params):
     return 0
 
 
-def create_raw_files(files, file_specifications, output, kd_pkd=False):
+def create_raw_files(files, file_specifications, output):
     """
     :param files: input files and path parsed from the config
     :param file_specifications: information about the columns of the input, parsed from the config
     :param output: intermediate output or final output file names, names specified in the config
-    :param kd_pkd:  parameter that decides if Kd values should be also transformed into pKd values
     :return: no value is returned, creates the drug, target and interaction files, creates affinity value plot
     """
     f = open(files['path'] + output['target_file'], 'w')
@@ -93,12 +92,24 @@ def create_raw_files(files, file_specifications, output, kd_pkd=False):
 
     interactions = file.pivot_table(index=file_specifications['ligand_IDs'], columns=file_specifications['protein_IDs'],
                                     values=file_specifications['interaction_value'], aggfunc='sum')
-    if kd_pkd:
-        interactions = interactions.apply(lambda x: -np.log10(x / 1e9))
+
     interactions.to_csv(files['path'] + output['interaction_file'], sep='\t')
 
     f.close()
     d.close()
+
+    return 0
+
+
+def kd_to_pkd(files, output):
+    """
+    :param files: input files and path parsed from the config
+    :param output: intermediate output or final output file names, names specified in the config
+    :return: no value is returned, transforms Kd affinity file into pKd and saves it to a separate file
+    """
+    interactions = pd.read_csv(files['path'] + output['interaction_file'], sep='\t', header=0, index_col=0)
+    interactions = interactions.apply(lambda x: -np.log10(x / 1e9))
+    interactions.to_csv(files['path'] + output['interaction_file_pKd'], sep='\t')
 
     return 0
 
@@ -113,7 +124,7 @@ def save_affinity_values_plot(files, output, before_after, create_plots):
     :return: no value is returned, creates affinity value plot
     """
     if before_after == "before":
-        interactions = pd.read_csv(files['path'] + output['interaction_file'], sep='\t', header=0, index_col=0)
+        interactions = pd.read_csv(files['path'] + output['interaction_file_pKd'], sep='\t', header=0, index_col=0)
     elif before_after == "after":
         interactions = pd.read_csv(files['path'] + output['cleaned_interaction_file'], sep=',', header=0, index_col=0)
     else:
@@ -270,9 +281,8 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output):
         if type(frame_a.at[i, frame_a.columns[0]]) == pd.core.series.Series:
             compounds_appearing_more_than_once += [i]
     compounds_appearing_more_than_once = list(set(compounds_appearing_more_than_once))
-    intermediate_drugs = pd.read_csv(files['path'] + output['clustered_drugs'], sep=',', header=0,
-                                     index_col=1)
-    interaction_file = pd.read_csv(files['path'] + output['interaction_file'], sep='\t', header=0, index_col=0)
+    intermediate_drugs = pd.read_csv(files['path'] + output['clustered_drugs'], sep=',', header=0, index_col=1)
+    interaction_file = pd.read_csv(files['path'] + output['interaction_file_pKd'], sep='\t', header=0, index_col=0)
 
     frame_a = frame_a.drop(compounds_appearing_more_than_once)
     frame_b = frame_b.drop(compounds_appearing_more_than_once)
@@ -286,9 +296,8 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output):
     return frame_a, frame_b, compounds_appearing_more_than_once
 
 
-def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output):
+def update_interactions(frame_a, frame_b, dict_of_drugs, dict_of_targets, files, output):
     """
-    :param data: interaction file created by drop_unwanted_troublemakers
     :param frame_a: frame created by drop_unwanted_troublemakers, holds the sum of the interaction values for
     one cluster
     :param frame_b: frame created by drop_unwanted_troublemakers, holds the number of the interaction values for
@@ -299,6 +308,7 @@ def update_interactions(data, frame_a, frame_b, dict_of_drugs, dict_of_targets, 
     :param output: intermediate output or final output file names, names specified in the config
     :return: drugs and compounds that cause errors for saving, creates the final interaction file
     """
+    data = pd.read_csv(files['path'] + output['intermediate_interaction_file'], sep='\t', header=0, index_col=0)
 
     key_errors = []
     boxplot_dict = {}  # to create some visualizations of the data
@@ -396,13 +406,15 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
 
     means = [statistics.mean(x) for x in values]
     keys = [x for _, x in sorted(zip(means, keys))]
+    for i in values:
+        print(i)
     values = [x for _, x in sorted(zip(means, values))]
     frame = pd.DataFrame(columns=["Keys", "Values", "Interacting"])
 
     for i in range(len(keys)):
         for value in values[i]:
             if file_specifications['ligand_IDs'] == "PubChem CID":
-                key = " ".join(keys[i].split(".0_"))
+                key = " ".join(keys[i].split("_"))
             else:
                 key = keys[i]
             new_row = {'Keys': key, 'Values': value, "Interacting": "Yes" if value > 7 else "No"}
