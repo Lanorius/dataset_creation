@@ -36,7 +36,6 @@ def raw_transformer(files, file_specifications, output, params):
                              chunksize=chunksize, usecols=cols, on_bad_lines='skip', engine='python'):
         chunk = chunk.dropna(how='any', subset=[file_specifications['protein_IDs']])
         chunk = chunk.dropna(how='any', subset=[file_specifications['ligand_IDs']])
-        # chunk = chunk.dropna(how='any', subset=[file_specifications['interaction_value']])  # TODO: remove?
         if params['bad_characters'] != "":
             chunk = chunk[~chunk[file_specifications['ligand_SMILE']].str.contains('|'.join(literal_eval(
                 params['bad_characters'])))]
@@ -50,6 +49,7 @@ def raw_transformer(files, file_specifications, output, params):
         chunk = chunk.loc[~(chunk[file_specifications['interaction_value']] == 0)]
         cleaned_frame = pd.concat([cleaned_frame, chunk])
 
+    cleaned_frame[file_specifications['ligand_IDs']] = cleaned_frame[file_specifications['ligand_IDs']].astype(int)
     cleaned_frame.to_csv(files['path'] + output['cleaned_frame'], sep='\t')
 
     return 0
@@ -115,7 +115,6 @@ def kd_to_pkd(files, output):
 
 
 def save_affinity_values_plot(files, output, before_after, create_plots):
-    # TODO: maybe add constant bins
     """
     :param files: input files and path parsed from the config
     :param output: intermediate output or final output file names, names specified in the config
@@ -290,7 +289,8 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output):
     interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
 
     intermediate_drugs.to_csv(files['path'] + output['intermediate_drug_representatives'], sep='\t')
-    # TODO: You need to create a proper clustered drugs output file, currently the intermediate is the finished one
+    intermediate_drugs.to_csv(files['path'] + output['drug_representatives'], sep='\t')
+    # This can actually stay like this, and later a few more compounds will be encoded, but never used
     interaction_file.to_csv(files['path'] + output['intermediate_interaction_file'], sep='\t')
 
     return frame_a, frame_b, compounds_appearing_more_than_once
@@ -368,13 +368,6 @@ def save_problematic_drugs_targets(compounds_appearing_more_than_once, key_error
     return 0
 
 
-def sample_from_dict(d, sample):  # TODO: obsolete
-    keys = random.sample(list(d), sample)
-    values = [d[k] for k in keys]
-    # return dict(zip(keys, values))
-    return keys, values
-
-
 def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, min_bin_size, sample_size):
     """
     :param file: boxplot data file
@@ -387,8 +380,8 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
     """
 
     raw_data = h5todict(file)
-    # TODO: Maybe find a way to fix this. This step is needed, since silx
-    #  saves the dict in a separate dict for every folder down the path the file is saved.
+    # This step is needed, since silx saves a dict in a separate
+    # dict for every folder down the path the file is saved.
     while len(raw_data) == 1:
         raw_data = raw_data[list(raw_data.keys())[0]]
 
@@ -401,13 +394,10 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
             dict_with_many_values[key] = raw_data[key]
 
     keys = random.sample(list(dict_with_many_values), sample_size)
-    values = [dict_with_many_values[k] for k in keys]
-    # keys, values = sample_from_dict(dict_with_many_values, sample_size)
+    values = [dict_with_many_values[k].tolist() for k in keys]
 
     means = [statistics.mean(x) for x in values]
     keys = [x for _, x in sorted(zip(means, keys))]
-    for i in values:
-        print(i)
     values = [x for _, x in sorted(zip(means, values))]
     frame = pd.DataFrame(columns=["Keys", "Values", "Interacting"])
 
