@@ -290,8 +290,10 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output):
 
     intermediate_drugs.to_csv(files['path'] + output['intermediate_drug_representatives'], sep='\t')
     intermediate_drugs.to_csv(files['path'] + output['drug_representatives'], sep='\t')
-    # This can actually stay like this, and later a few more compounds will be encoded, but never used
-    interaction_file.to_csv(files['path'] + output['intermediate_interaction_file'], sep='\t')
+
+    # TODO: If during the prediction there are compounds missing, the issue is very likely in the following line.
+    cleaned_interaction_file = interaction_file.drop_duplicates(subset=['ClusterNumber'], keep='first')
+    cleaned_interaction_file.to_csv(files['path'] + output['intermediate_interaction_file'], sep='\t')
 
     return frame_a, frame_b, compounds_appearing_more_than_once
 
