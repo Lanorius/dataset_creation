@@ -101,6 +101,14 @@ def create_raw_files(files, file_specifications, output):
     return 0
 
 
+def create_alternative_drug_file(files, output):
+    temp_drugs = pd.read_csv(files['path'] + output['drug_file'], sep=' ', names=['SMILES', 'Name'])
+    temp_drugs = temp_drugs[['Name', 'SMILES']]
+    temp_drugs.to_csv(files['path'] + output['alternative_drug_file'], sep='\t', index=False)
+
+    return 0
+
+
 def kd_to_pkd(files, output):
     """
     :param files: input files and path parsed from the config
