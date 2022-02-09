@@ -188,7 +188,6 @@ def cluster_drugs(files, output, params):
                          ' --butinaReordering=yes ' + '-i ' + files['path'] + output['drug_file'] + ' -o ' + \
                          files['path'] + output['clustered_drugs']
     subprocess.call(clustering_process, shell=True)
-
     return 0
 
 
@@ -295,13 +294,12 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output):
     frame_b = frame_b.drop(compounds_appearing_more_than_once)
     intermediate_drugs = intermediate_drugs.drop(compounds_appearing_more_than_once)
     interaction_file = interaction_file.drop(compounds_appearing_more_than_once)
+    interaction_file.to_csv(files['path'] + output['intermediate_interaction_file'], sep='\t')
 
     intermediate_drugs.to_csv(files['path'] + output['intermediate_drug_representatives'], sep='\t')
-    intermediate_drugs.to_csv(files['path'] + output['drug_representatives'], sep='\t')
-
     # TODO: If during the prediction there are compounds missing, the issue is very likely in the following line.
-    cleaned_interaction_file = interaction_file.drop_duplicates(subset=['ClusterNumber'], keep='first')
-    cleaned_interaction_file.to_csv(files['path'] + output['intermediate_interaction_file'], sep='\t')
+    cleaned_drugs = intermediate_drugs.drop_duplicates(subset=['ClusterNumber'], keep='first')
+    cleaned_drugs.to_csv(files['path'] + output['drug_representatives'], sep='\t')
 
     return frame_a, frame_b, compounds_appearing_more_than_once
 
@@ -417,8 +415,9 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
                 key = " ".join(keys[i].split("_"))
             else:
                 key = keys[i]
-            new_row = {'Keys': key, 'Values': value, "Interacting": "Yes" if value > 7 else "No"}
-            frame = frame.append(new_row, ignore_index=True)
+            new_row = {'Keys': [key], 'Values': [value], "Interacting": ["Yes" if value > 7 else "No"]}
+            new_row = pd.DataFrame.from_dict(new_row)
+            frame = pd.concat([frame, new_row])
 
     # Boxplot
 
@@ -428,7 +427,7 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
     # adding cutoff line
     plt.axhline(y=7, color='r', linestyle='-')
     plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
-    plt.title("Boxplot of pKd values of "+str(sample_size)+" random Clusters")
+    plt.title("Boxplot of pKd values of " + str(sample_size) + " random Clusters")
     plt.tight_layout()
     plt.savefig(boxplot_out_file)
     plt.clf()
@@ -445,8 +444,14 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
 
     hist_frame = pd.DataFrame(columns=["Keys", "Interacting", "Freq"])
     for key in list_of_keys:
-        hist_frame = hist_frame.append({"Keys": key, "Interacting": "No"}, ignore_index=True)
-        hist_frame = hist_frame.append({"Keys": key, "Interacting": "Yes"}, ignore_index=True)
+        n_item = {"Keys": [key], "Interacting": ["No"]}
+        y_item = {"Keys": [key], "Interacting": ["Yes"]}
+        n_item = pd.DataFrame.from_dict(n_item)
+        y_item = pd.DataFrame.from_dict(y_item)
+        hist_frame = pd.concat([hist_frame, n_item])
+        hist_frame = pd.concat([hist_frame, y_item])
+        # hist_frame = hist_frame.append({"Keys": key, "Interacting": "No"}, ignore_index=True)
+        # hist_frame = hist_frame.append({"Keys": key, "Interacting": "Yes"}, ignore_index=True)
 
     freq_list = []
     for _, row in hist_frame.iterrows():
@@ -458,7 +463,7 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
     # adding cutoff line
     plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
     plt.ylabel("Frequency")
-    plt.title("Histogram of pKd values of "+str(sample_size)+" random Clusters")
+    plt.title("Histogram of pKd values of " + str(sample_size) + " random Clusters")
     plt.tight_layout()
     plt.savefig(hist_out_file)
     plt.clf()
