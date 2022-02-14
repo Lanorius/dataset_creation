@@ -12,7 +12,6 @@ def parse_config():
     sub_tasks_to_perform = [config["PERFORM SUB-STEPS"].getboolean('transform_Kd_to_pKd'),
                             config["PERFORM SUB-STEPS"].getboolean('save_affinity'),
                             config["PERFORM SUB-STEPS"].getboolean('save_boxplot'),
-                            config["PERFORM SUB-STEPS"].getboolean('skip_clustering_and_redundancy_reduction'),
                             config["PERFORM SUB-STEPS"].getboolean('skip_clustering')]
 
     files = config["INPUT FILES"]

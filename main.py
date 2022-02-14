@@ -90,7 +90,7 @@ if tasks_to_perform[3]:
 else:
     print("Part 4: Skipping the making of the files DTI ready.")
 
-if sub_tasks_to_perform[1]:
+if sub_tasks_to_perform[1] and not sub_tasks_to_perform[3]:
     print("Part 4.2: Creating plot for affinity values, after clustering.")
     save_affinity_values_plot(files, output, before_after="after", create_plots=sub_tasks_to_perform[0])
 else:
