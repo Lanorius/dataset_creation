@@ -49,8 +49,8 @@ if sub_tasks_to_perform[0]:
     kd_to_pkd(files, output)
 
 if sub_tasks_to_perform[3]:
-    print("Creating alternative drug file.")
-    create_alternative_drug_file(files, output)
+    print("Creating unclustered files.")
+    create_unclustered_files(files, output)
 
 if sub_tasks_to_perform[1]:
     print("Part 1.2: Creating plot for affinity values, before clustering.")

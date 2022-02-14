@@ -101,10 +101,25 @@ def create_raw_files(files, file_specifications, output):
     return 0
 
 
-def create_alternative_drug_file(files, output):
+def create_unclustered_files(files, output):
     temp_drugs = pd.read_csv(files['path'] + output['drug_file'], sep=' ', names=['SMILES', 'Name'])
     temp_drugs = temp_drugs[['Name', 'SMILES']]
-    temp_drugs.to_csv(files['path'] + output['alternative_drug_file'], sep='\t', index=False)
+    temp_drugs.to_csv(files['path'] + output['unclustered_drug_file'], sep='\t', index=False)
+
+    interactions = pd.read_csv(files['path'] + output['interaction_file'], sep='\t', header=0, index_col=0)
+    # rows are fixed with chemVAE, since it kicks out some of them
+    # affinity_rows = interactions.index.values.tolist()
+    # print(len(affinity_rows))
+    affinity_cols = interactions.columns.tolist()
+    print(affinity_cols[0])
+    print(len(affinity_cols))
+
+    with open(files['path'] + output['target_file']) as file:
+        lines = [line.rstrip()[1:] for line in file if line[0] == ">"]
+    lines = (list(set(lines)))
+    affinity_cols.sort()
+    lines.sort()
+    print(affinity_cols == lines)
 
     return 0
 

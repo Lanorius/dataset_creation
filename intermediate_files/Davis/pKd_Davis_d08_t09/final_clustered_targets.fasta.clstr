@@ -1,0 +1,817 @@
+>Cluster 0
+0	2549aa, >MTOR... *
+>Cluster 1
+0	2527aa, >LRRK2... *
+1	2527aa, >LRRK2(G2019S)... at 100.00%
+>Cluster 2
+0	2347aa, >ROS1... *
+>Cluster 3
+0	2027aa, >CIT... *
+>Cluster 4
+0	2022aa, >TRPM6... *
+>Cluster 5
+0	1914aa, >MYLK... *
+>Cluster 6
+0	1732aa, >MRCKA... *
+>Cluster 7
+0	1711aa, >MRCKB... *
+>Cluster 8
+0	1649aa, >GCN2(KinDom2S808G)... *
+>Cluster 9
+0	1634aa, >PIK3C2B... *
+>Cluster 10
+0	1620aa, >ALK... *
+>Cluster 11
+0	1616aa, >MYO3A... *
+>Cluster 12
+0	1608aa, >MAP3K4... *
+>Cluster 13
+0	1570aa, >MAST1... *
+>Cluster 14
+0	1551aa, >DMPK2... *
+>Cluster 15
+0	1512aa, >MAP3K1... *
+>Cluster 16
+0	1445aa, >PIK3C2G... *
+>Cluster 17
+0	1430aa, >DAPK1... *
+>Cluster 18
+0	1400aa, >MST1R... *
+>Cluster 19
+0	1390aa, >MET... *
+1	1390aa, >MET(M1250T)... at 100.00%
+2	1390aa, >MET(Y1235D)... at 100.00%
+>Cluster 20
+0	1382aa, >INSR... *
+>Cluster 21
+0	1374aa, >ASK1... *
+>Cluster 22
+0	1367aa, >IGF1R... *
+>Cluster 23
+0	1363aa, >FLT4... *
+>Cluster 24
+0	1360aa, >TNIK... *
+>Cluster 25
+0	1356aa, >VEGFR2... *
+>Cluster 26
+0	1354aa, >ROCK1... *
+>Cluster 27
+0	1342aa, >ERBB3... *
+>Cluster 28
+0	1341aa, >MYO3B... *
+>Cluster 29
+0	1338aa, >FLT1... *
+>Cluster 30
+0	1332aa, >MINK... *
+>Cluster 31
+0	1328aa, >YSK4... *
+>Cluster 32
+0	1315aa, >STK36... *
+>Cluster 33
+0	1313aa, >MAP3K15... *
+>Cluster 34
+0	1311aa, >GAK... *
+>Cluster 35
+0	1308aa, >ERBB4... *
+>Cluster 36
+0	1297aa, >INSRR... *
+>Cluster 37
+0	1288aa, >ASK2... *
+>Cluster 38
+0	1273aa, >MAP4K4... *
+>Cluster 39
+0	1263aa, >QSK... *
+>Cluster 40
+0	1258aa, >NEK1... *
+>Cluster 41
+0	1255aa, >ERBB2... *
+>Cluster 42
+0	1235aa, >SLK... *
+>Cluster 43
+0	1235aa, >TAOK2... *
+>Cluster 44
+0	1215aa, >HIPK3... *
+>Cluster 45
+0	1210aa, >EGFR... *
+1	1210aa, >EGFR(E746A750del)... at 100.00%
+2	1210aa, >EGFR(G719C)... at 100.00%
+3	1210aa, >EGFR(G719S)... at 100.00%
+4	1210aa, >EGFR(L747E749del)... at 100.00%
+5	1210aa, >EGFR(L747S752del)... at 100.00%
+6	1210aa, >EGFR(L747T751del)... at 100.00%
+7	1210aa, >EGFR(L858R)... at 100.00%
+8	1210aa, >EGFR(L858RT790M)... at 100.00%
+9	1210aa, >EGFR(L861Q)... at 100.00%
+10	1210aa, >EGFR(S752I759del)... at 100.00%
+11	1210aa, >EGFR(T790M)... at 100.00%
+>Cluster 46
+0	1210aa, >HIPK1... *
+>Cluster 47
+0	1198aa, >HIPK2... *
+>Cluster 48
+0	1187aa, >TYK2(JH1domain-cata... *
+1	1187aa, >TYK2(JH2domain-pseu... at 100.00%
+>Cluster 49
+0	1167aa, >ABL1(E255K)... *
+1	1167aa, >ABL1(F317I)... at 100.00%
+2	1167aa, >ABL1(F317I)p... at 100.00%
+3	1167aa, >ABL1(F317L)... at 100.00%
+4	1167aa, >ABL1(F317L)p... at 100.00%
+5	1167aa, >ABL1(H396P)... at 100.00%
+6	1167aa, >ABL1(H396P)p... at 100.00%
+7	1167aa, >ABL1(M351T)... at 100.00%
+8	1167aa, >ABL1(Q252H)... at 100.00%
+9	1167aa, >ABL1(Q252H)p... at 100.00%
+10	1167aa, >ABL1(T315I)... at 100.00%
+11	1167aa, >ABL1(T315I)p... at 100.00%
+12	1167aa, >ABL1(Y253F)... at 100.00%
+13	1167aa, >ABL1... at 100.00%
+14	1167aa, >ABL1p... at 100.00%
+>Cluster 50
+0	1167aa, >ABL2... *
+>Cluster 51
+0	1161aa, >BIKE... *
+>Cluster 52
+0	1157aa, >TIE2... *
+>Cluster 53
+0	1154aa, >JAK1(JH1domain-cata... *
+1	1154aa, >JAK1(JH2domain-pseu... at 100.00%
+>Cluster 54
+0	1138aa, >TIE1... *
+>Cluster 55
+0	1132aa, >JAK2(JH1domain-cata... *
+>Cluster 56
+0	1130aa, >LATS1... *
+>Cluster 57
+0	1124aa, >JAK3(JH1domain-cata... *
+>Cluster 58
+0	1102aa, >PIK3CG... *
+>Cluster 59
+0	1089aa, >PDGFRA... *
+>Cluster 60
+0	1088aa, >LATS2... *
+>Cluster 61
+0	1074aa, >FAK... *
+>Cluster 62
+0	1070aa, >PIK3CB... *
+>Cluster 63
+0	1069aa, >PIK3CA... *
+1	1069aa, >PIK3CA(C420R)... at 100.00%
+2	1069aa, >PIK3CA(E542K)... at 100.00%
+3	1069aa, >PIK3CA(E545A)... at 100.00%
+4	1069aa, >PIK3CA(E545K)... at 100.00%
+5	1069aa, >PIK3CA(H1047L)... at 100.00%
+6	1069aa, >PIK3CA(H1047Y)... at 100.00%
+7	1069aa, >PIK3CA(I800L)... at 100.00%
+8	1069aa, >PIK3CA(M1043I)... at 100.00%
+9	1069aa, >PIK3CA(Q546K)... at 100.00%
+>Cluster 64
+0	1050aa, >ULK1... *
+>Cluster 65
+0	1044aa, >PIK3CD... *
+>Cluster 66
+0	1038aa, >BMPR2... *
+>Cluster 67
+0	1038aa, >TNK2... *
+>Cluster 68
+0	1036aa, >ULK2... *
+>Cluster 69
+0	1030aa, >CDKL5... *
+>Cluster 70
+0	1021aa, >EPHB6... *
+>Cluster 71
+0	1017aa, >EPHA5... *
+>Cluster 72
+0	1009aa, >PYK2... *
+>Cluster 73
+0	1007aa, >PRP4... *
+>Cluster 74
+0	1005aa, >EPHA8... *
+>Cluster 75
+0	1001aa, >TAOK1... *
+>Cluster 76
+0	999aa, >MERTK... *
+>Cluster 77
+0	998aa, >EPHA7... *
+>Cluster 78
+0	998aa, >EPHB3... *
+>Cluster 79
+0	993aa, >FLT3... *
+1	993aa, >FLT3(D835H)... at 100.00%
+2	993aa, >FLT3(D835Y)... at 100.00%
+3	993aa, >FLT3(ITD)... at 100.00%
+4	993aa, >FLT3(K663Q)... at 100.00%
+5	993aa, >FLT3(N841I)... at 100.00%
+6	993aa, >FLT3(R834Q)... at 100.00%
+>Cluster 80
+0	986aa, >EPHA4... *
+>Cluster 81
+0	984aa, >EPHB1... *
+>Cluster 82
+0	984aa, >PKN2... *
+>Cluster 83
+0	983aa, >EPHA3... *
+>Cluster 84
+0	979aa, >NEK9... *
+>Cluster 85
+0	977aa, >ERN1... *
+>Cluster 86
+0	976aa, >EPHA1... *
+>Cluster 87
+0	976aa, >EPHA2... *
+>Cluster 88
+0	976aa, >KIT... *
+1	976aa, >KIT(A829P)... at 100.00%
+2	976aa, >KIT(D816H)... at 100.00%
+3	976aa, >KIT(D816V)... at 100.00%
+4	976aa, >KIT(L576P)... at 100.00%
+5	976aa, >KIT(V559D)... at 100.00%
+6	976aa, >KIT(V559D-T670I)... at 100.00%
+7	976aa, >KIT(V559D-V654A)... at 100.00%
+>Cluster 89
+0	972aa, >CSF1R... *
+>Cluster 90
+0	970aa, >PLK4... *
+>Cluster 91
+0	968aa, >LOK... *
+>Cluster 92
+0	966aa, >LZK... *
+>Cluster 93
+0	961aa, >AAK1... *
+>Cluster 94
+0	954aa, >MLK2... *
+>Cluster 95
+0	942aa, >PKN1... *
+>Cluster 96
+0	935aa, >EPHB4... *
+>Cluster 97
+0	929aa, >RIPK5... *
+>Cluster 98
+0	926aa, >CASK... *
+>Cluster 99
+0	926aa, >SIK2... *
+>Cluster 100
+0	913aa, >DDR1... *
+>Cluster 101
+0	912aa, >PRKD1... *
+>Cluster 102
+0	898aa, >TAOK3... *
+>Cluster 103
+0	894aa, >AXL... *
+>Cluster 104
+0	894aa, >MAP4K3... *
+>Cluster 105
+0	890aa, >PRKD3... *
+>Cluster 106
+0	890aa, >TYRO3... *
+>Cluster 107
+0	878aa, >PRKD2... *
+>Cluster 108
+0	869aa, >MUSK... *
+>Cluster 109
+0	864aa, >LTK... *
+>Cluster 110
+0	859aa, >DLK... *
+>Cluster 111
+0	857aa, >TTK... *
+>Cluster 112
+0	855aa, >DDR2... *
+>Cluster 113
+0	847aa, >MLK3... *
+>Cluster 114
+0	846aa, >MAP4K5... *
+>Cluster 115
+0	839aa, >TRKC... *
+>Cluster 116
+0	835aa, >TNNI3K... *
+>Cluster 117
+0	833aa, >HPK1... *
+>Cluster 118
+0	822aa, >FER... *
+>Cluster 119
+0	822aa, >FES... *
+>Cluster 120
+0	822aa, >FGFR1... *
+>Cluster 121
+0	821aa, >FGFR2... *
+>Cluster 122
+0	820aa, >MAP4K2... *
+>Cluster 123
+0	819aa, >MLCK... *
+>Cluster 124
+0	816aa, >ERK5... *
+>Cluster 125
+0	816aa, >PIK4CB... *
+>Cluster 126
+0	802aa, >FGFR4... *
+>Cluster 127
+0	802aa, >RPS6KA5(KinDom.1-N-... *
+1	802aa, >RPS6KA5(KinDom.2-C-... at 100.00%
+>Cluster 128
+0	800aa, >ZAK... *
+>Cluster 129
+0	795aa, >MARK1... *
+>Cluster 130
+0	790aa, >TRKA... *
+>Cluster 131
+0	788aa, >MARK2... *
+>Cluster 132
+0	784aa, >RIPK4... *
+>Cluster 133
+0	783aa, >SIK... *
+>Cluster 134
+0	778aa, >BRSK1... *
+>Cluster 135
+0	777aa, >PDGFRB... *
+>Cluster 136
+0	772aa, >RPS6KA4(KinDom.1-N-... *
+1	772aa, >RPS6KA4(KinDom.2-C-... at 100.00%
+>Cluster 137
+0	772aa, >TLK2... *
+>Cluster 138
+0	766aa, >BRAF... *
+1	766aa, >BRAF(V600E)... at 100.00%
+>Cluster 139
+0	766aa, >DCAMKL2... *
+>Cluster 140
+0	766aa, >TLK1... *
+>Cluster 141
+0	765aa, >ANKK1... *
+>Cluster 142
+0	765aa, >SNRK... *
+>Cluster 143
+0	763aa, >DYRK1A... *
+>Cluster 144
+0	762aa, >PRKG2... *
+>Cluster 145
+0	756aa, >IKK-beta... *
+>Cluster 146
+0	753aa, >MARK3... *
+>Cluster 147
+0	752aa, >MARK4... *
+>Cluster 148
+0	745aa, >IKK-alpha... *
+>Cluster 149
+0	745aa, >RSK4(KinDom.1-N-ter... *
+1	745aa, >RSK4(KinDom.2-C-ter... at 100.00%
+>Cluster 150
+0	740aa, >DCAMKL1... *
+>Cluster 151
+0	740aa, >RSK2(KinDom.1-N-ter... *
+>Cluster 152
+0	737aa, >PRKCE... *
+>Cluster 153
+0	736aa, >BRSK2... *
+>Cluster 154
+0	735aa, >RSK1(KinDom.1-N-ter... *
+1	735aa, >RSK1(KinDom.2-C-ter... at 100.00%
+>Cluster 155
+0	733aa, >RSK3(KinDom.1-N-ter... *
+1	733aa, >RSK3(KinDom.2-C-ter... at 100.00%
+>Cluster 156
+0	729aa, >TBK1... *
+>Cluster 157
+0	721aa, >ERK3... *
+>Cluster 158
+0	719aa, >PAK7... *
+>Cluster 159
+0	716aa, >IKK-epsilon... *
+>Cluster 160
+0	714aa, >HUNK... *
+>Cluster 161
+0	712aa, >IRAK1... *
+>Cluster 162
+0	708aa, >NEK5... *
+>Cluster 163
+0	706aa, >PRKCQ... *
+>Cluster 164
+0	703aa, >ROCK2... *
+>Cluster 165
+0	688aa, >SRPK2... *
+>Cluster 166
+0	685aa, >PLK2... *
+>Cluster 167
+0	683aa, >PRKCH... *
+>Cluster 168
+0	681aa, >PAK6... *
+>Cluster 169
+0	676aa, >PRKCD... *
+>Cluster 170
+0	675aa, >BMX... *
+>Cluster 171
+0	671aa, >PRKG1... *
+>Cluster 172
+0	671aa, >RIPK1... *
+>Cluster 173
+0	668aa, >PIP5K1C... *
+>Cluster 174
+0	666aa, >CAMK2B... *
+>Cluster 175
+0	666aa, >TNK1... *
+>Cluster 176
+0	661aa, >ARK5... *
+>Cluster 177
+0	655aa, >SRPK1... *
+>Cluster 178
+0	651aa, >MELK... *
+>Cluster 179
+0	648aa, >DCAMKL3... *
+>Cluster 180
+0	648aa, >RAF1... *
+>Cluster 181
+0	647aa, >ADCK3... *
+>Cluster 182
+0	647aa, >LIMK1... *
+>Cluster 183
+0	646aa, >PLK3... *
+>Cluster 184
+0	646aa, >WEE1... *
+>Cluster 185
+0	645aa, >NEK11... *
+>Cluster 186
+0	638aa, >CLK3... *
+>Cluster 187
+0	638aa, >LIMK2... *
+>Cluster 188
+0	635aa, >SYK... *
+>Cluster 189
+0	632aa, >ICK... *
+>Cluster 190
+0	631aa, >TEC... *
+>Cluster 191
+0	630aa, >EIF2AK1... *
+>Cluster 192
+0	629aa, >DMPK... *
+>Cluster 193
+0	629aa, >DYRK1B... *
+>Cluster 194
+0	628aa, >SNARK... *
+>Cluster 195
+0	626aa, >MAP3K3... *
+>Cluster 196
+0	626aa, >PKNB(Mtuberculosis)... *
+>Cluster 197
+0	623aa, >MAK... *
+>Cluster 198
+0	620aa, >ITK... *
+>Cluster 199
+0	619aa, >MAP3K2... *
+>Cluster 200
+0	619aa, >ZAP70... *
+>Cluster 201
+0	616aa, >HIPK4... *
+>Cluster 202
+0	606aa, >TAK1... *
+>Cluster 203
+0	603aa, >PLK1... *
+>Cluster 204
+0	601aa, >DYRK2... *
+>Cluster 205
+0	599aa, >BLK... *
+>Cluster 206
+0	596aa, >IRAK3... *
+>Cluster 207
+0	596aa, >MYLK2... *
+>Cluster 208
+0	596aa, >PRKCI... *
+>Cluster 209
+0	592aa, >CDKL3... *
+>Cluster 210
+0	591aa, >PAK4... *
+>Cluster 211
+0	588aa, >CAMKK2... *
+>Cluster 212
+0	587aa, >ERK4... *
+>Cluster 213
+0	582aa, >LYN... *
+>Cluster 214
+0	578aa, >GRK4... *
+>Cluster 215
+0	568aa, >RIOK1... *
+>Cluster 216
+0	567aa, >SRPK3... *
+>Cluster 217
+0	567aa, >TGFBR2... *
+>Cluster 218
+0	567aa, >WEE2... *
+>Cluster 219
+0	563aa, >GRK1... *
+>Cluster 220
+0	562aa, >PIP5K1A... *
+>Cluster 221
+0	559aa, >AMPK-alpha1... *
+>Cluster 222
+0	559aa, >PAK3... *
+>Cluster 223
+0	558aa, >CAMK2G... *
+>Cluster 224
+0	556aa, >PDPK1... *
+>Cluster 225
+0	553aa, >GRK7... *
+>Cluster 226
+0	552aa, >AMPK-alpha2... *
+>Cluster 227
+0	552aa, >RIOK2... *
+>Cluster 228
+0	547aa, >EPHA6... *
+>Cluster 229
+0	545aa, >PAK1... *
+>Cluster 230
+0	545aa, >STK39... *
+>Cluster 231
+0	544aa, >ADCK4... *
+>Cluster 232
+0	544aa, >ERK8... *
+>Cluster 233
+0	543aa, >CHEK2... *
+>Cluster 234
+0	543aa, >YES... *
+>Cluster 235
+0	542aa, >CDC2L1... *
+1	475aa, >CDC2L2... at 98.95%
+>Cluster 236
+0	540aa, >RIPK2... *
+>Cluster 237
+0	537aa, >FYN... *
+>Cluster 238
+0	536aa, >SRC... *
+>Cluster 239
+0	534aa, >STK35... *
+>Cluster 240
+0	532aa, >BMPR1A... *
+>Cluster 241
+0	529aa, >FGR... *
+>Cluster 242
+0	527aa, >NLK... *
+>Cluster 243
+0	527aa, >OSR1... *
+>Cluster 244
+0	527aa, >TXK... *
+>Cluster 245
+0	526aa, >HCK... *
+>Cluster 246
+0	525aa, >S6K1... *
+>Cluster 247
+0	524aa, >PAK2... *
+>Cluster 248
+0	524aa, >PFCDPK1(Pfalciparum... *
+>Cluster 249
+0	523aa, >PCTK2... *
+>Cluster 250
+0	519aa, >RIOK3... *
+>Cluster 251
+0	514aa, >STK33... *
+>Cluster 252
+0	513aa, >ACVR2A... *
+>Cluster 253
+0	513aa, >PRKR... *
+>Cluster 254
+0	512aa, >ACVR2B... *
+>Cluster 255
+0	509aa, >ACVR1... *
+>Cluster 256
+0	509aa, >LCK... *
+>Cluster 257
+0	508aa, >VRK2... *
+>Cluster 258
+0	507aa, >CTK... *
+>Cluster 259
+0	506aa, >NEK3... *
+>Cluster 260
+0	505aa, >ACVR1B... *
+>Cluster 261
+0	505aa, >CAMKK1... *
+>Cluster 262
+0	505aa, >FRK... *
+>Cluster 263
+0	503aa, >ACVRL1... *
+>Cluster 264
+0	503aa, >TGFBR1... *
+>Cluster 265
+0	502aa, >BMPR1B... *
+>Cluster 266
+0	502aa, >CDK11... *
+>Cluster 267
+0	499aa, >CAMK2D... *
+>Cluster 268
+0	499aa, >CLK2... *
+>Cluster 269
+0	499aa, >PKMYT1... *
+>Cluster 270
+0	496aa, >SGK3... *
+>Cluster 271
+0	493aa, >CDKL2... *
+>Cluster 272
+0	491aa, >MST2... *
+>Cluster 273
+0	488aa, >SRMS... *
+>Cluster 274
+0	487aa, >MST1... *
+>Cluster 275
+0	486aa, >YANK3... *
+>Cluster 276
+0	484aa, >CLK1... *
+>Cluster 277
+0	483aa, >BTK... *
+>Cluster 278
+0	483aa, >GSK3A... *
+>Cluster 279
+0	482aa, >EPHB2... *
+>Cluster 280
+0	481aa, >AKT2... *
+>Cluster 281
+0	481aa, >CLK4... *
+>Cluster 282
+0	480aa, >AKT1... *
+>Cluster 283
+0	480aa, >FGFR3... *
+1	480aa, >FGFR3(G697C)... at 100.00%
+>Cluster 284
+0	479aa, >AKT3... *
+>Cluster 285
+0	478aa, >CAMK2A... *
+>Cluster 286
+0	477aa, >TRKB... *
+>Cluster 287
+0	476aa, >CAMK1G... *
+>Cluster 288
+0	476aa, >CHEK1... *
+>Cluster 289
+0	473aa, >CAMK4... *
+>Cluster 290
+0	473aa, >MAPKAPK5... *
+>Cluster 291
+0	472aa, >ULK3... *
+>Cluster 292
+0	469aa, >PFTK1... *
+>Cluster 293
+0	465aa, >MKNK1... *
+>Cluster 294
+0	465aa, >MKNK2... *
+>Cluster 295
+0	465aa, >NDR1... *
+>Cluster 296
+0	464aa, >CDK8... *
+>Cluster 297
+0	427aa, >JNK1... at 90.87%
+1	464aa, >JNK3... *
+>Cluster 298
+0	464aa, >NDR2... *
+>Cluster 299
+0	460aa, >IRAK4... *
+>Cluster 300
+0	458aa, >RET... *
+1	458aa, >RET(M918T)... at 100.00%
+2	458aa, >RET(V804L)... at 100.00%
+3	458aa, >RET(V804M)... at 100.00%
+>Cluster 301
+0	454aa, >DAPK3... *
+>Cluster 302
+0	451aa, >BRK... *
+>Cluster 303
+0	451aa, >NEK4... *
+>Cluster 304
+0	450aa, >CSK... *
+>Cluster 305
+0	448aa, >MEK5... *
+>Cluster 306
+0	448aa, >PCTK1... *
+>Cluster 307
+0	447aa, >CSNK1G3... *
+>Cluster 308
+0	445aa, >NEK2... *
+>Cluster 309
+0	443aa, >MST3... *
+>Cluster 310
+0	436aa, >NIM1... *
+>Cluster 311
+0	436aa, >PCTK3... *
+>Cluster 312
+0	435aa, >PFTAIRE2... *
+>Cluster 313
+0	433aa, >LKB1... *
+>Cluster 314
+0	426aa, >YSK1... *
+>Cluster 315
+0	424aa, >JNK2... *
+>Cluster 316
+0	424aa, >SBK1... *
+>Cluster 317
+0	422aa, >CSNK1G1... *
+>Cluster 318
+0	421aa, >PIP5K2C... *
+>Cluster 319
+0	420aa, >GSK3B... *
+>Cluster 320
+0	419aa, >MKK7... *
+>Cluster 321
+0	416aa, >CSNK1E... *
+>Cluster 322
+0	416aa, >MST4... *
+>Cluster 323
+0	416aa, >PIP5K2B... *
+>Cluster 324
+0	415aa, >CSNK1D... *
+>Cluster 325
+0	415aa, >CSNK1G2... *
+>Cluster 326
+0	414aa, >DRAK1... *
+>Cluster 327
+0	414aa, >YANK2... *
+>Cluster 328
+0	406aa, >PHKG2... *
+>Cluster 329
+0	404aa, >PIM1... *
+>Cluster 330
+0	403aa, >AURKA... *
+>Cluster 331
+0	400aa, >MAPKAPK2... *
+>Cluster 332
+0	400aa, >MEK2... *
+>Cluster 333
+0	399aa, >MEK4... *
+>Cluster 334
+0	396aa, >YANK1... *
+>Cluster 335
+0	393aa, >MEK1... *
+>Cluster 336
+0	391aa, >CSNK2A1... *
+>Cluster 337
+0	388aa, >MYLK4... *
+>Cluster 338
+0	387aa, >PHKG1... *
+>Cluster 339
+0	385aa, >CAMK1D... *
+>Cluster 340
+0	379aa, >ERK1... *
+>Cluster 341
+0	373aa, >MLK1... *
+>Cluster 342
+0	372aa, >CDK9... *
+>Cluster 343
+0	372aa, >DRAK2... *
+>Cluster 344
+0	370aa, >CAMK1... *
+>Cluster 345
+0	370aa, >DAPK2... *
+>Cluster 346
+0	367aa, >p38-gamma... *
+>Cluster 347
+0	367aa, >TSSK1B... *
+>Cluster 348
+0	365aa, >p38-delta... *
+>Cluster 349
+0	364aa, >p38-beta... *
+>Cluster 350
+0	360aa, >ERK2... *
+>Cluster 351
+0	360aa, >p38-alpha... *
+>Cluster 352
+0	359aa, >SgK110... *
+>Cluster 353
+0	358aa, >PRKX... *
+>Cluster 354
+0	357aa, >CDKL1... *
+>Cluster 355
+0	351aa, >PKAC-alpha... *
+1	351aa, >PKAC-beta... at 92.88%
+>Cluster 356
+0	350aa, >CSNK2A2... *
+>Cluster 357
+0	347aa, >MEK3... *
+>Cluster 358
+0	346aa, >CDK7... *
+>Cluster 359
+0	344aa, >AURKB... *
+>Cluster 360
+0	337aa, >CSNK1A1... *
+1	337aa, >CSNK1A1L... at 90.50%
+>Cluster 361
+0	334aa, >MEK6... *
+>Cluster 362
+0	326aa, >PIM3... *
+>Cluster 363
+0	324aa, >CDC2L5... *
+>Cluster 364
+0	313aa, >NEK6... *
+>Cluster 365
+0	311aa, >PIM2... *
+>Cluster 366
+0	309aa, >AURKC... *
+>Cluster 367
+0	305aa, >CDK3... *
+>Cluster 368
+0	305aa, >STK16... *
+>Cluster 369
+0	303aa, >CDK4-cyclinD1... *
+1	303aa, >CDK4-cyclinD3... at 100.00%
+>Cluster 370
+0	302aa, >NEK7... *
+>Cluster 371
+0	298aa, >CDK2... *
+>Cluster 372
+0	292aa, >CDK5... *
+>Cluster 373
+0	288aa, >PFPK5(Pfalciparum)... *
+>Cluster 374
+0	244aa, >TESK1... *
