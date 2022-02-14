@@ -1,0 +1,22 @@
+Drug ids of tautomeres, that RDKit doesn't put in the same cluster:
+
+Drug and Target ids that are not in any cluster:
+'RPS6KA4(KinDom.2-C-terminal)'
+'RPS6KA5(KinDom.2-C-terminal)'
+'RPS6KA5(KinDom.1-N-terminal)'
+'RSK3(KinDom.2-C-terminal)'
+'PFCDPK1(Pfalciparum)'
+'RSK4(KinDom.2-C-terminal)'
+'JAK3(JH1domain-catalytic)'
+'JAK2(JH1domain-catalytic)'
+'RSK1(KinDom.2-C-terminal)'
+'RSK2(KinDom.1-N-terminal)'
+10074640
+'JAK1(JH1domain-catalytic)'
+'RSK3(KinDom.1-N-terminal)'
+'RSK4(KinDom.1-N-terminal)'
+'JAK1(JH2domain-pseudokinase)'
+'RPS6KA4(KinDom.1-N-terminal)'
+'TYK2(JH1domain-catalytic)'
+'RSK1(KinDom.1-N-terminal)'
+'TYK2(JH2domain-pseudokinase)'
