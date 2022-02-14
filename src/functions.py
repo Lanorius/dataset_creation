@@ -106,6 +106,7 @@ def create_unclustered_files(files, output):
     temp_drugs = temp_drugs[['Name', 'SMILES']]
     temp_drugs.to_csv(files['path'] + output['unclustered_drug_file'], sep='\t', index=False)
 
+    '''
     interactions = pd.read_csv(files['path'] + output['interaction_file'], sep='\t', header=0, index_col=0)
     # rows are fixed with chemVAE, since it kicks out some of them
     # affinity_rows = interactions.index.values.tolist()
@@ -120,6 +121,7 @@ def create_unclustered_files(files, output):
     affinity_cols.sort()
     lines.sort()
     print(affinity_cols == lines)
+    '''
 
     return 0
 
