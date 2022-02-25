@@ -14,24 +14,6 @@ from src.functions import *
 # import matplotlib.pyplot as plt  # for the boxplot
 
 
-# TODO: change this comment
-'''
-
-
-
-One idea would be to expect the user to do a very basic level of preprocessing
-This document will be much more powerful if we can expect the input to be the following:
-    -a csv or tsv file including columns with protein IDs, protein sequences, compound IDs, 
-    compound SMILES/Fingerprints, a parameter of affinity (Kd, Ki, IC50, EC50)
-    -for each file these columns have to be specified in the config file
-
-add a config file that specifies:
-The name of all input files
-The wanted parameters: sequence similarity, smile similarity, affinity values...
-The name of the output file
-Whatever else comes to mind
-'''
-
 tasks_to_perform, sub_tasks_to_perform, files, file_specifications, output, params = parse_config()
 
 if not os.path.isdir(files['path']):
