@@ -1,9 +1,3 @@
-papers
-ignored_files
-building_pieces
-get_header
-work_in_progress
 intermediate_files
-notes.txt
-What you have done so far.odt
-for_later
+__pycache__
+old
