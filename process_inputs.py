@@ -1,6 +1,5 @@
 import configparser
 
-
 def parse_config():
     config = configparser.ConfigParser()
     config.read("config.ini")
@@ -20,3 +19,4 @@ def parse_config():
     params = config['PARAMETERS']
 
     return tasks_to_perform, sub_tasks_to_perform, files, file_specifications, output, params
+    
