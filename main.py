@@ -36,7 +36,7 @@ if sub_tasks_to_perform[3]:
 
 if sub_tasks_to_perform[1]:
     print("Part 1.2: Creating plot for affinity values, before clustering.")
-    save_affinity_values_plot(files, output, before_after="before", create_plots=sub_tasks_to_perform[0])
+    save_affinity_values_plot(files, output, before_after="before", create_plots=True)
 else:
     print("Part 1.2: Skipping plot for affinity values, before clustering.")
 
@@ -74,7 +74,7 @@ else:
 
 if sub_tasks_to_perform[1] and not sub_tasks_to_perform[3]:
     print("Part 4.2: Creating plot for affinity values, after clustering.")
-    save_affinity_values_plot(files, output, before_after="after", create_plots=sub_tasks_to_perform[0])
+    save_affinity_values_plot(files, output, before_after="after", create_plots=True)
 else:
     print("Part 4.2: Skipping plot for affinity values, after clustering.")
 

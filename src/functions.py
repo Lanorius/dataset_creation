@@ -159,7 +159,7 @@ def save_affinity_values_plot(files, output, before_after, create_plots):
 
     if create_plots:
         plt.hist(flat_interactions, bins=(math.ceil(max(flat_interactions)) + math.ceil(min(flat_interactions))))
-        plt.xlabel("Values")
+        plt.xlabel("pKd Values")
         plt.ylabel("Frequencies")
 
     if before_after == "before":
@@ -169,7 +169,7 @@ def save_affinity_values_plot(files, output, before_after, create_plots):
                 g.write("\n")
 
         if create_plots:
-            plt.title("Interaction Values before clustering.")
+            plt.title("pKd Values before clustering.")
             plt.savefig(files['path'] + output['affinity_plot_before_clustering'])
             plt.clf()
 
@@ -180,7 +180,7 @@ def save_affinity_values_plot(files, output, before_after, create_plots):
                 g.write("\n")
 
         if create_plots:
-            plt.title("Interaction Values after clustering.")
+            plt.title("pKd Values after clustering.")
             plt.savefig(files['path'] + output['affinity_plot_after_clustering'])
             plt.clf()
 
@@ -306,7 +306,6 @@ def drop_unwanted_troublemakers(col_names, row_names, files, output):
     compounds_appearing_more_than_once = list(set(compounds_appearing_more_than_once))
     intermediate_drugs = pd.read_csv(files['path'] + output['clustered_drugs'], sep=',', header=0, index_col=1)
     interaction_file = pd.read_csv(files['path'] + output['interaction_file_pKd'], sep='\t', header=0, index_col=0)
-
     frame_a = frame_a.drop(compounds_appearing_more_than_once)
     frame_b = frame_b.drop(compounds_appearing_more_than_once)
     intermediate_drugs = intermediate_drugs.drop(compounds_appearing_more_than_once)
@@ -354,7 +353,6 @@ def update_interactions(frame_a, frame_b, dict_of_drugs, dict_of_targets, files,
                 except (Exception,):  # Probably not 100% elegant
                     error_msg = traceback.format_exc()
                     key_errors += [error_msg.split('\n')[-2][10:]]  # saves faulty keys
-
     print('Updating Interactions Part 2/2. Done by: ' + str(frame_a.shape[1]))
     time.sleep(1)
     for name, _ in tqdm(frame_a.iteritems()):
@@ -424,7 +422,7 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
     means = [statistics.mean(x) for x in values]
     keys = [x for _, x in sorted(zip(means, keys))]
     values = [x for _, x in sorted(zip(means, values))]
-    frame = pd.DataFrame(columns=["Keys", "Values", "Interacting"])
+    frame = pd.DataFrame(columns=["Keys", "Values", "Binding"])
 
     for i in range(len(keys)):
         for value in values[i]:
@@ -432,18 +430,19 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
                 key = " ".join(keys[i].split("_"))
             else:
                 key = keys[i]
-            new_row = {'Keys': [key], 'Values': [value], "Interacting": ["Yes" if value > 7 else "No"]}
+            new_row = {'Keys': [key], 'Values': [value], "Binding": ["Yes" if value > 7 else "No"]}
             new_row = pd.DataFrame.from_dict(new_row)
             frame = pd.concat([frame, new_row])
 
     # Boxplot
 
     sns.boxplot(x='Keys', y='Values', data=frame, color="cornflowerblue")
-    sns.stripplot(x='Keys', y='Values', data=frame, linewidth=1, edgecolor="black", hue="Interacting")
+    sns.stripplot(x='Keys', y='Values', data=frame, linewidth=1, edgecolor="black", hue="Binding")
     plt.xticks(rotation=90)
     # adding cutoff line
     plt.axhline(y=7, color='r', linestyle='-')
-    plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
+    plt.xlabel("Cluster Representatives: PubChem CID and UniProt (SwissProt) Primary ID")
+    # plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
     plt.title("Boxplot of pKd values of " + str(sample_size) + " random Clusters")
     plt.tight_layout()
     plt.savefig(boxplot_out_file)
@@ -459,26 +458,27 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
         if key not in list_of_keys:
             list_of_keys += [key]
 
-    hist_frame = pd.DataFrame(columns=["Keys", "Interacting", "Freq"])
+    hist_frame = pd.DataFrame(columns=["Keys", "Binding", "Freq"])
     for key in list_of_keys:
-        n_item = {"Keys": [key], "Interacting": ["No"]}
-        y_item = {"Keys": [key], "Interacting": ["Yes"]}
+        n_item = {"Keys": [key], "Binding": ["No"]}
+        y_item = {"Keys": [key], "Binding": ["Yes"]}
         n_item = pd.DataFrame.from_dict(n_item)
         y_item = pd.DataFrame.from_dict(y_item)
         hist_frame = pd.concat([hist_frame, n_item])
         hist_frame = pd.concat([hist_frame, y_item])
-        # hist_frame = hist_frame.append({"Keys": key, "Interacting": "No"}, ignore_index=True)
-        # hist_frame = hist_frame.append({"Keys": key, "Interacting": "Yes"}, ignore_index=True)
+        # hist_frame = hist_frame.append({"Keys": key, "Binding": "No"}, ignore_index=True)
+        # hist_frame = hist_frame.append({"Keys": key, "Binding": "Yes"}, ignore_index=True)
 
     freq_list = []
     for _, row in hist_frame.iterrows():
-        freq_list += [frame[(frame["Keys"] == row["Keys"]) & (frame["Interacting"] == row["Interacting"])].shape[0]]
+        freq_list += [frame[(frame["Keys"] == row["Keys"]) & (frame["Binding"] == row["Binding"])].shape[0]]
     hist_frame["Freq"] = freq_list
 
-    sns.barplot(x="Keys", y="Freq", hue="Interacting", data=hist_frame)
+    sns.barplot(x="Keys", y="Freq", hue="Binding", data=hist_frame)
     plt.xticks(rotation=90)
     # adding cutoff line
-    plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
+    plt.xlabel("Cluster Representatives: PubChem CID and UniProt (SwissProt) Primary ID")
+    # plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
     plt.ylabel("Frequency")
     plt.title("Histogram of pKd values of " + str(sample_size) + " random Clusters")
     plt.tight_layout()
