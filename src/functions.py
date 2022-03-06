@@ -413,7 +413,7 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
     for key in raw_data.keys():
         # Still deciding on which bins have enough data for the boxplot.
         # The integer here decides how many values have to be at least present to be considered for the boxplot.
-        if len(raw_data[key]) > min_bin_size:
+        if len(raw_data[key]) >= min_bin_size:
             dict_with_many_values[key] = raw_data[key]
 
     keys = random.sample(list(dict_with_many_values), sample_size)
