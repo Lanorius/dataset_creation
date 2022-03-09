@@ -2,7 +2,7 @@
 
 
 This repo compliments the DTI prediction algorithm in:
-[Data Creator](https://github.com/Lanorius/binding-affinity-prediction): Predicits the datasets that are created here.
+[Data Creator](https://github.com/Lanorius/binding-affinity-prediction)
 
 #### How to use the Data Cleaner
 1. Clone this repo
