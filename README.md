@@ -2,8 +2,7 @@
 
 
 The following two repos were also part of my project. All three are required to repeat my steps:
-
-[Prediction Of Binding Affinity](https://github.com/Lanorius/binding-affinity-prediction): prediction of DTI
+[Prediction Of Binding Affinity](https://github.com/Lanorius/binding-affinity-prediction): prediction of DTI\
 [ChemVAE Fork](https://github.com/Lanorius/chemical_vae): encoding of the small molecules
 
 Additionally PortT5 are needed:
