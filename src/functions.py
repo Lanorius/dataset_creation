@@ -395,7 +395,7 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
     """
     :param file: boxplot data file
     :param boxplot_out_file: boxplot image file
-    :param hist_out_file: histogram image file
+    :param hist_out_file: bar chart image file
     :param file_specifications: for compound and protein ids
     :param min_bin_size: min amount of drug target pairs that a cluster needs to have
     :param sample_size: number of randomly drawn drug target clusters/plots that will be created
@@ -480,7 +480,7 @@ def boxplot_creator(file, boxplot_out_file, hist_out_file, file_specifications, 
     plt.xlabel("Cluster Representatives: PubChem CID and UniProt (SwissProt) Primary ID")
     # plt.xlabel(file_specifications['ligand_IDs'] + " and " + file_specifications['protein_IDs'])
     plt.ylabel("Frequency")
-    plt.title("Histogram of pKd values of " + str(sample_size) + " random Clusters")
+    plt.title("Bar Chart of pKd values of " + str(sample_size) + " random Clusters")
     plt.tight_layout()
     plt.savefig(hist_out_file)
     plt.clf()
