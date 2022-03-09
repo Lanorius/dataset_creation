@@ -1,11 +1,11 @@
 # My Master's Thesis: Drug-Target-Interaction (DTI) Dataset Creation
 
 
-The following two repos were also part of my project. All three are required to repeat my steps:
+The following two repos were also part of my project. All three are required to repeat my steps:\
 [Prediction Of Binding Affinity](https://github.com/Lanorius/binding-affinity-prediction): prediction of DTI\
 [ChemVAE Fork](https://github.com/Lanorius/chemical_vae): encoding of the small molecules
 
-Additionally PortT5 are needed:
+Additionally PortT5 are needed:\
 [Prot T5] (https://github.com/agemagician/ProtTrans): encoding of the proteins
 
 
