@@ -28,6 +28,6 @@ print(statistics.median(var_of_boxes))
 print(statistics.mean(var_of_boxes))
 print(max(var_of_boxes))
 
-#plt.hist(var_of_boxes)
-#plt.show()
+plt.hist(var_of_boxes)
+plt.show()
 
